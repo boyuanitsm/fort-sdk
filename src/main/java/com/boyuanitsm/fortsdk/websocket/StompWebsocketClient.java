@@ -14,7 +14,6 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class StompWebsocketClient {
         transports.add(new RestTemplateXhrTransport());
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Cookie", "JSESSIONID=AEB9202EB69D8A6188C18838BD51920C; remember-me=VjZlUU13NWlVMXdYQTFIcFFyNURGdz09Ojh1TU1RbFR2RUx2bmkrOEJvUTdMWEE9PQ; NG_TRANSLATE_LANG_KEY=%22en%22; CSRF-TOKEN=ad6e7b2a-a848-49a6-a5c4-774715bc0df4");
+        headers.add("Cookie", "JSESSIONID=26D343966A35EA2DD183A63CED65F344; remember-me=QnFCM0tHU09CQlpudzg1aU1EbEY3UT09OnRqTVlrQUNIbEF4UjNvdTRoaXNmQXc9PQ; NG_TRANSLATE_LANG_KEY=%22en%22; CSRF-TOKEN=fcfa7528-094f-4e86-aa03-2a5745fce2f6");
 
         SockJsClient sockJsClient = new SockJsClient(transports);
 

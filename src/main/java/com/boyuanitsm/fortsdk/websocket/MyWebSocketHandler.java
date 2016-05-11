@@ -11,9 +11,9 @@ public class MyWebSocketHandler implements StompSessionHandler {
 
 
     public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
-        stompSession.send("/topic/hello", "java client");
+        // stompSession.send("/topic/hello", "java client");
 
-        stompSession.subscribe("/topic/greetings", new StompFrameHandler() {
+        stompSession.subscribe("/topic/admin/greetings", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders stompHeaders) {
                 return String.class;
@@ -40,7 +40,7 @@ public class MyWebSocketHandler implements StompSessionHandler {
     }
 
     public void handleFrame(StompHeaders stompHeaders, Object o) {
-        System.out.println(stompHeaders);
+        // System.out.println(stompHeaders);
         System.out.println(o);
     }
 }
