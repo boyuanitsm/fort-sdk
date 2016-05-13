@@ -1,6 +1,7 @@
-package com.boyuanitsm.fortsdk.websocket;
+package com.boyuanitsm.fortsdk.client;
 
 
+import com.boyuanitsm.fortsdk.handler.MyWebSocketHandler;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.util.concurrent.FailureCallback;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * @author zhanghua on 5/11/16.
  */
-public class StompWebsocketClient {
+public class WebSocketSTOMPClient {
 
     public static void main(String[] args) throws Exception {
         List<Transport> transports = new ArrayList<Transport>(2);
@@ -34,7 +35,7 @@ public class StompWebsocketClient {
 
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
         stompClient.setMessageConverter(new StringMessageConverter());
-        ListenableFuture<StompSession> future = stompClient.connect("ws://localhost:8080/websocket/greetings", headers, new MyWebSocketHandler());
+        ListenableFuture<StompSession> future = stompClient.connect("ws://localhost:8080/client/greetings", headers, new MyWebSocketHandler());
 
         future.addCallback(new SuccessCallback<StompSession>() {
             public void onSuccess(StompSession stompSession) {

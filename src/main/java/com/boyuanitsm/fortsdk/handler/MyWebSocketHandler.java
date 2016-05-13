@@ -1,4 +1,4 @@
-package com.boyuanitsm.fortsdk.websocket;
+package com.boyuanitsm.fortsdk.handler;
 
 import org.springframework.messaging.simp.stomp.*;
 
