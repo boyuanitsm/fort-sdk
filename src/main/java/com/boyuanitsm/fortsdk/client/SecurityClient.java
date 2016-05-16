@@ -1,9 +1,9 @@
 package com.boyuanitsm.fortsdk.client;
 
 import com.boyuanitsm.fortsdk.config.SecurityConfiguration;
+import com.boyuanitsm.fortsdk.domain.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -25,17 +25,16 @@ import java.util.List;
 public class SecurityClient {
 
     private static final String API_ALL_SECURITY_RESOURCE_ENTITIES = "/api/security-resource-entities";
-
     private static final String API_LOGIN_SECURITY_SERVER = "/api/authentication";
 
 
-    CloseableHttpClient httpClient = HttpClients.createDefault();
+    private CloseableHttpClient httpClient = HttpClients.createDefault();
 
     private void loginSecurityServer(String appKey, String secret) throws IOException {
         HttpPost post = new HttpPost(SecurityConfiguration.BASE_SERVER_HOST + API_LOGIN_SECURITY_SERVER);
         List<NameValuePair> formparams = new ArrayList<NameValuePair>();
         formparams.add(new BasicNameValuePair("j_username", appKey));
-        formparams.add(new BasicNameValuePair("j_password", appKey));
+        formparams.add(new BasicNameValuePair("j_password", secret));
         formparams.add(new BasicNameValuePair("remember-me", "true"));
         formparams.add(new BasicNameValuePair("submit", "Login"));
 
@@ -50,12 +49,31 @@ public class SecurityClient {
         }
     }
 
-    public static void main(String[] args) {
-        SecurityClient client = new SecurityClient();
-        try {
-            client.loginSecurityServer(SecurityConfiguration.APP_KEY, SecurityConfiguration.APP_SECRET);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void registerNewUser(SecurityUser user) {
+
+    }
+
+    public void updateUser(SecurityUser user) {
+
+    }
+
+    public List<SecurityResourceEntity> getAllResourceEntity() {
+        return null;
+    }
+
+    public List<SecurityNav> getAllNavs() {
+        return null;
+    }
+
+    public List<SecurityAuthority> getAllAuthority() {
+        return null;
+    }
+
+    public List<SecurityRole> getAllRole() {
+        return null;
+    }
+
+    public List<SecurityGroup> getAllGroup() {
+        return null;
     }
 }
