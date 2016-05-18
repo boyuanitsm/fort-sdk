@@ -1,0 +1,21 @@
+# ===================================================================
+# Fort configuration
+# ===================================================================
+
+# ===================================================================
+# Standard Fort properties.
+# Full reference is available at:
+# http://fort.com/conf/common-application-properties.html
+# ===================================================================
+
+fort:
+    app:
+        serverBase: http://localhost:8080
+        appKey: soqcnpjhxqku
+        appSecret: 6ddeh9nrgtjd
+    authentication:
+        loginProcessingUrl: /fort/login
+        logoutUrl: /fort/logout
+    user:
+        defaultRoles: user
+        defaultGroups: dev
