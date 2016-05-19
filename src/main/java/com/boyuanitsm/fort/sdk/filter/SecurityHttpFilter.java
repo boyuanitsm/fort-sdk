@@ -9,6 +9,7 @@ import com.boyuanitsm.fort.sdk.domain.SecurityAuthority;
 import com.boyuanitsm.fort.sdk.domain.SecurityResourceEntity;
 import com.boyuanitsm.fort.sdk.domain.SecurityRole;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
+import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -120,9 +121,11 @@ public class SecurityHttpFilter implements Filter {
 
                 // login success, redirect to success return
                 response.sendRedirect(configuration.getLogin().getSuccessReturn());
-            } catch (Exception e) {
+            } catch (FortAuthenticationException e) {
                 // login or password error, redirect to error return
                 response.sendRedirect(configuration.getLogin().getErrorReturn());
+            } catch (Exception e) {
+                log.error("login error", e);
             }
         }
 

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
+import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import org.apache.http.HttpException;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -76,8 +77,12 @@ public class FortClient {
         JSONObject obj = new JSONObject();
         obj.put("login", login);
         obj.put("passwordHash", password);
-        String content = httpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
-        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
+        try {
+            String content = httpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
+            return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
+        }catch (RuntimeException e) {
+            throw new FortAuthenticationException("login or password fail", e);
+        }
     }
 
     /**
