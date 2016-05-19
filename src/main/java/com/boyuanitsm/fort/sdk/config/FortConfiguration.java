@@ -1,11 +1,9 @@
 package com.boyuanitsm.fort.sdk.config;
 
-import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
 import com.boyuanitsm.fort.sdk.domain.SecurityRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
@@ -40,14 +38,14 @@ public class FortConfiguration {
     public class App {
         App(Object app) {
             Map<String, String> appMap = (Map<String, String>) app;
-            this.serverBase = appMap.get("serverBase");
-            this.appKey = appMap.get("appKey");
-            this.appSecret = appMap.get("appSecret");
+            this.serverBase = appMap.get("server-base");
+            this.appKey = appMap.get("app-key");
+            this.appSecret = appMap.get("app-secret");
         }
 
-        private String serverBase;
-        private String appKey;
-        private String appSecret;
+        private final String serverBase;
+        private final String appKey;
+        private final String appSecret;
 
         public String getServerBase() {
             return serverBase;
@@ -73,36 +71,78 @@ public class FortConfiguration {
 
     public class Authentication {
         Authentication(Object authentication) {
-            Map<String, String> authenticationMap = (Map<String, String>) authentication;
-            this.loginProcessingUrl = authenticationMap.get("loginProcessingUrl");
-            this.logoutUrl = authenticationMap.get("logoutUrl");
+            Map<String, Object> authenticationMap = (Map<String, Object>) authentication;
+            login = new Login(authenticationMap.get("login"));
+            logout = new Logout(authenticationMap.get("logout"));
         }
 
-        private String loginProcessingUrl;
-        private String logoutUrl;
+        private final Login login;
+        private final Logout logout;
 
-        public String getLoginProcessingUrl() {
-            return loginProcessingUrl;
+        public class Login {
+            Login(Object login) {
+                Map<String, String> loginMap = (Map<String, String>) login;
+                this.url = loginMap.get("url");
+                this.successReturn = loginMap.get("success-return");
+                this.errorReturn = loginMap.get("error-return");
+                this.loginView = loginMap.get("login-view");
+            }
+
+            private final String url;
+            private final String successReturn;
+            private final String errorReturn;
+            private final String loginView;
+
+            public String getUrl() {
+                return url;
+            }
+
+            public String getSuccessReturn() {
+                return successReturn;
+            }
+
+            public String getErrorReturn() {
+                return errorReturn;
+            }
+
+            public String getLoginView() {
+                return loginView;
+            }
         }
 
-        public String getLogoutUrl() {
-            return logoutUrl;
+        public class Logout {
+            Logout(Object logout) {
+                Map<String, String> loginMap = (Map<String, String>) logout;
+                this.url = loginMap.get("url");
+                this.successReturn = loginMap.get("success-return");
+            }
+
+            private final String url;
+            private final String successReturn;
+
+            public String getUrl() {
+                return url;
+            }
+
+            public String getSuccessReturn() {
+                return successReturn;
+            }
         }
 
-        @Override
-        public String toString() {
-            return "Authentication{" +
-                    "loginProcessingUrl='" + loginProcessingUrl + '\'' +
-                    ", logoutUrl='" + logoutUrl + '\'' +
-                    '}';
+        public Login getLogin() {
+            return login;
+        }
+
+        public Logout getLogout() {
+            return logout;
         }
     }
 
     public class User {
         User(Object user) {
             Map<String, String> userMap = (Map<String, String>) user;
-            String defaultRoles = userMap.get("defaultRoles");
-            String defaultGroups = userMap.get("defaultGroups");
+            String defaultRoles = userMap.get("default-roles");
+            String defaultGroups = userMap.get("default-groups");
 
             String[] roles = defaultRoles.split(",");
             String[] groups = defaultGroups.split(",");
@@ -162,11 +202,19 @@ public class FortConfiguration {
         return app;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public Authentication getAuthentication() {
         return authentication;
     }
 
-    public User getUser() {
-        return user;
+    public Authentication.Login getLogin() {
+        return authentication.login;
+    }
+
+    public Authentication.Logout getLogout() {
+        return authentication.logout;
     }
 }

@@ -10,12 +10,18 @@
 
 fort:
     app:
-        serverBase: http://localhost:8080
-        appKey: soqcnpjhxqku
-        appSecret: 6ddeh9nrgtjd
+        server-base: http://localhost:8080
+        app-key: soqcnpjhxqku
+        app-secret: 6ddeh9nrgtjd
     authentication:
-        loginProcessingUrl: /fort/login
-        logoutUrl: /fort/logout
+        login:
+            url: /fort/login
+            success-return: /home
+            error-return: /login?error_msg=1
+            login-view: /login
+        logout:
+            url: /fort/logout
+            success-return: /home
     user:
-        defaultRoles: user
-        defaultGroups: dev
+        default-roles: user
+        default-groups: dev

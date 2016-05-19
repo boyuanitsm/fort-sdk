@@ -54,10 +54,10 @@ public class SecurityHttpFilter implements Filter{
 
         log.debug("request uri: {}", requestUri);
 
-        if (configuration.getAuthentication().getLoginProcessingUrl().equals(requestUri)) {
+        if (configuration.getLogin().getUrl().equals(requestUri)) {
             handler.login(request, response);
             return;
-        } else if (configuration.getAuthentication().getLogoutUrl().equals(requestUri)) {
+        } else if (configuration.getLogout().getUrl().equals(requestUri)) {
             handler.logout(request, response);
             return;
         } else {
