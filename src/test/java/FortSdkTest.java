@@ -1,3 +1,6 @@
+import com.boyuanitsm.form.sdk.util.SecurityUtils;
+import com.boyuanitsm.fort.sdk.context.FortContext;
+import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
@@ -17,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @RequestMapping("/api/profile")
-    String product() {
-        return "profile!";
+    FortContext product() {
+        return FortContextHolder.getContext();
     }
 
     public static void main(String[] args) throws Exception {
