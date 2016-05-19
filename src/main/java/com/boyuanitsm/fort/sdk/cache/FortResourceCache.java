@@ -24,6 +24,10 @@ public class FortResourceCache {
     private FortClient fortClient;
 
     private static Map<Long, SecurityResourceEntity> resourceEntityCache;
+    /**
+     * resource url - id map
+     */
+    private static Map<String, Long> resourceUrlIdMap;
     private static Map<Long, SecurityNav> navCache;
     private static Map<Long, SecurityAuthority> authorityCache;
     private static Map<Long, SecurityRole> roleCache;
@@ -40,6 +44,7 @@ public class FortResourceCache {
      */
     private void initCache() {
         resourceEntityCache = new HashMap<Long, SecurityResourceEntity>();
+        resourceUrlIdMap = new HashMap<String, Long>();
         navCache = new HashMap<Long, SecurityNav>();
         authorityCache = new HashMap<Long, SecurityAuthority>();
         roleCache = new HashMap<Long, SecurityRole>();
@@ -62,6 +67,7 @@ public class FortResourceCache {
         List<SecurityResourceEntity> resourceEntities = fortClient.getAllResourceEntities();
         for (SecurityResourceEntity resourceEntity: resourceEntities) {
             resourceEntityCache.put(resourceEntity.getId(), resourceEntity);
+            resourceUrlIdMap.put(resourceEntity.getUrl(), resourceEntity.getId());
         }
         // load navs
         List<SecurityNav> navs = fortClient.getAllSecurityNavs();
@@ -133,15 +139,23 @@ public class FortResourceCache {
         return authorityCache;
     }
 
-    public static Map<Long, SecurityNav> getNavCache() {
+    public Map<Long, SecurityNav> getNavCache() {
         return navCache;
     }
 
-    public static Map<Long, SecurityRole> getRoleCache() {
+    public Map<Long, SecurityRole> getRoleCache() {
         return roleCache;
     }
 
-    public static Map<Long, SecurityGroup> getGroupCache() {
+    public Map<Long, SecurityGroup> getGroupCache() {
         return groupCache;
+    }
+
+    public Long getResourceId(String url) {
+        return resourceUrlIdMap.get(url);
+    }
+
+    public SecurityResourceEntity getResourceEntity(Long id) {
+        return resourceEntityCache.get(id);
     }
 }

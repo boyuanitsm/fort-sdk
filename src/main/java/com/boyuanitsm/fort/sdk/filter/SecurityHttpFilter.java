@@ -1,9 +1,12 @@
 package com.boyuanitsm.fort.sdk.filter;
 
+import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
+import com.boyuanitsm.fort.sdk.domain.SecurityAuthority;
+import com.boyuanitsm.fort.sdk.domain.SecurityResourceEntity;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -16,11 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Security Http Filter
  *
- * @author zhanghua on 5/10/16.
+ * @author zhanghua on 5/17/16.
  */
 @Component
 public class SecurityHttpFilter implements Filter{
@@ -33,28 +37,37 @@ public class SecurityHttpFilter implements Filter{
     @Autowired
     private FortClient client;
 
+    @Autowired
+    private FortResourceCache cache;
+
     private AuthenticationHandler handler = new AuthenticationHandler();
 
     public void init(FilterConfig filterConfig) throws ServletException {
+        // on init
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        log.debug("request uri: {}", request.getRequestURI());
+        String requestUri = request.getRequestURI();
 
-        if (configuration.getAuthentication().getLoginProcessingUrl().equals(request.getRequestURI())) {
+        log.debug("request uri: {}", requestUri);
+
+        if (configuration.getAuthentication().getLoginProcessingUrl().equals(requestUri)) {
             handler.login(request, response);
             return;
-        } else if (configuration.getAuthentication().getLogoutUrl().equals(request.getRequestURI())) {
+        } else if (configuration.getAuthentication().getLogoutUrl().equals(requestUri)) {
             handler.logout(request, response);
             return;
         } else {
-            handler.setFortContext(request);
+            Long resourceId = cache.getResourceId(requestUri);
+            if (resourceId != null) {
+                handler.authentication(request, response, chain, resourceId);
+                return;
+            }
+            // handler.setFortContext(request);
         }
-
-        log.info(FortContextHolder.getContext().getSecurityUser().toString());
 
         chain.doFilter(request, response);
     }
@@ -64,7 +77,7 @@ public class SecurityHttpFilter implements Filter{
     }
 
     /**
-     * Fort Authentication Handler. login, logout.
+     * Fort Authentication Handler.
      *
      * @author zhanghua on 5/17/16.
      */
@@ -122,6 +135,24 @@ public class SecurityHttpFilter implements Filter{
             } else {
                 FortContextHolder.setContext(FortContext.createEmptyContext());
             }
+        }
+
+        private void authentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Long resourceId) throws IOException, ServletException {
+            // setFortContext(request);
+            Object attr = request.getSession().getAttribute(FortContextHolder.FORT_SESSION_NAME);
+
+            if (attr == null) {
+                // redirect to login view
+            }
+
+            // get resource entity
+            SecurityResourceEntity resourceEntity = cache.getResourceEntity(resourceId);
+            // get this resource relation authorities
+            Set<SecurityAuthority> authorities = resourceEntity.getAuthorities();
+
+
+
+            chain.doFilter(request, response);
         }
     }
 
