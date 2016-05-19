@@ -62,6 +62,7 @@ public class FortClient {
         httpClient.postForm(API_AUTHENTICATION,
                 new BasicNameValuePair("j_username", appKey),
                 new BasicNameValuePair("j_password", secret),
+                new BasicNameValuePair("remember-me", "true"),
                 new BasicNameValuePair("submit", "Login"));
     }
 
