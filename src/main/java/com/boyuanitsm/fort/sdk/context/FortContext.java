@@ -3,6 +3,7 @@ package com.boyuanitsm.fort.sdk.context;
 import com.boyuanitsm.fort.sdk.domain.SecurityAuthority;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -15,6 +16,7 @@ public class FortContext {
 
     private FortContext() {
         securityUser = new SecurityUser();
+        authorities = new HashSet<SecurityAuthority>();
     }
 
     private SecurityUser securityUser;

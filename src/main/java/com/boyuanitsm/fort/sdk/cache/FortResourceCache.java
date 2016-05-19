@@ -158,4 +158,8 @@ public class FortResourceCache {
     public SecurityResourceEntity getResourceEntity(Long id) {
         return resourceEntityCache.get(id);
     }
+
+    public SecurityRole getRole(Long id) {
+        return roleCache.get(id);
+    }
 }

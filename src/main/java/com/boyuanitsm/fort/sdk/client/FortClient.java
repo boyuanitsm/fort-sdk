@@ -28,10 +28,10 @@ public class FortClient {
 
     private static final String API_AUTHENTICATION = "/api/authentication";
 
-    private static final String API_SECURITY_RESOURCE_ENTITIES = "/api/security-resource-entities";
+    private static final String API_SA_SECURITY_RESOURCE_ENTITIES = "/api/sa/security-resource-entities";
     private static final String API_SECURITY_NAVS = "/api/security-navs";
-    private static final String API_SECURITY_AUTHORITIES = "/api/security-authorities";
-    private static final String API_SECURITY_ROLES = "/api/security-roles";
+    private static final String API_SA_SECURITY_AUTHORITIES = "/api/sa/security-authorities";
+    private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
     private static final String API_SECURITY_GROUPS = "/api/security-groups";
     private static final String API_SECURITY_USERS = "/api/security-users";
     private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
@@ -119,7 +119,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityResourceEntity> getAllResourceEntities() throws IOException, HttpException {
-        String content = httpClient.get(API_SECURITY_RESOURCE_ENTITIES);
+        String content = httpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
         return JSONArray.parseArray(content, SecurityResourceEntity.class);
     }
 
@@ -143,7 +143,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityAuthority> getAllAuthorities() throws IOException, HttpException {
-        String content = httpClient.get(API_SECURITY_AUTHORITIES);
+        String content = httpClient.get(API_SA_SECURITY_AUTHORITIES);
         return JSONArray.parseArray(content, SecurityAuthority.class);
     }
 
@@ -155,7 +155,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityRole> getAllRoles() throws IOException, HttpException {
-        String content = httpClient.get(API_SECURITY_ROLES);
+        String content = httpClient.get(API_SA_SECURITY_ROLES);
         return JSONArray.parseArray(content, SecurityRole.class);
     }
 

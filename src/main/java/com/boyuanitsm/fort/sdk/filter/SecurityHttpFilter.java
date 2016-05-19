@@ -59,6 +59,8 @@ public class SecurityHttpFilter implements Filter {
 
         log.debug("request uri: {}", requestUri);
 
+        handler.setFortContext(request);
+
         if (configuration.getLogin().getUrl().equals(requestUri)) {
             handler.login(request, response);
             return;
@@ -112,7 +114,9 @@ public class SecurityHttpFilter implements Filter {
                 Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
                 Set<SecurityRole> roles = user.getRoles();
                 for (SecurityRole role : roles) {
-                    authorities.addAll(role.getAuthorities());
+                    // get full role from cache, this role has eager relationships
+                    SecurityRole fullRole = cache.getRole(role.getId());
+                    authorities.addAll(fullRole.getAuthorities());
                 }
                 context.setAuthorities(authorities);
 
