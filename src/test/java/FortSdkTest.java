@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * fort sdk test. using Spring Boot.
+ *
  * @author zhanghua on 5/18/16.
  */
 @RestController
@@ -14,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
-    @RequestMapping("/")
-    String home() {
-        return "fort sdk test!";
+    @RequestMapping("/api/profile")
+    String product() {
+        return "profile!";
     }
 
     public static void main(String[] args) throws Exception {

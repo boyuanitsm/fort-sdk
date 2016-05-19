@@ -14,15 +14,15 @@ fort:
         app-key: soqcnpjhxqku
         app-secret: 6ddeh9nrgtjd
     authentication:
-        unauthorized-return: /fort/403
+        unauthorized-return: /unauthorized.html
         login:
             url: /fort/login
-            success-return: /home
-            error-return: /login?error_msg=1
-            login-view: /login
+            success-return: /index.html
+            error-return: /login.html?error=1
+            login-view: /login.html
         logout:
             url: /fort/logout
-            success-return: /home
+            success-return: /index.html
     user:
         default-roles: user
         default-groups: dev
