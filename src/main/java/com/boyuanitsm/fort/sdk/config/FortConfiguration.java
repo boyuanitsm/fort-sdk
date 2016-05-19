@@ -72,10 +72,12 @@ public class FortConfiguration {
     public class Authentication {
         Authentication(Object authentication) {
             Map<String, Object> authenticationMap = (Map<String, Object>) authentication;
-            login = new Login(authenticationMap.get("login"));
-            logout = new Logout(authenticationMap.get("logout"));
+            this.unauthorizedReturn = String.valueOf(authenticationMap.get("unauthorized-return"));
+            this.login = new Login(authenticationMap.get("login"));
+            this.logout = new Logout(authenticationMap.get("logout"));
         }
 
+        private final String unauthorizedReturn;
         private final Login login;
         private final Logout logout;
 
@@ -135,6 +137,10 @@ public class FortConfiguration {
 
         public Logout getLogout() {
             return logout;
+        }
+
+        public String getUnauthorizedReturn() {
+            return unauthorizedReturn;
         }
     }
 

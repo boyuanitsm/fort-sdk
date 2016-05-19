@@ -14,6 +14,7 @@ fort:
         app-key: soqcnpjhxqku
         app-secret: 6ddeh9nrgtjd
     authentication:
+        unauthorized-return: /fort/403
         login:
             url: /fort/login
             success-return: /home
