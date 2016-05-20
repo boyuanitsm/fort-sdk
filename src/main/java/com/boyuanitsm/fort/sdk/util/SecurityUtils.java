@@ -1,10 +1,9 @@
 package com.boyuanitsm.fort.sdk.util;
 
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
-import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
-import com.boyuanitsm.fort.sdk.domain.SecurityRole;
-import com.boyuanitsm.fort.sdk.domain.SecurityUser;
+import com.boyuanitsm.fort.sdk.domain.*;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,7 +47,7 @@ public final class SecurityUtils {
     /**
      * Get the login of the current user roles.
      *
-     * @return the login of the current user roles;
+     * @return the login of the current user roles.
      */
     public static Set<SecurityRole> getCurrentUserRoles() {
         SecurityUser user = getSecurityUser();
@@ -58,11 +57,29 @@ public final class SecurityUtils {
     /**
      * Get the login of the current user groups.
      *
-     * @return the login of the current user groups;
+     * @return the login of the current user groups.
      */
     public static Set<SecurityGroup> getCurrentUserGroups() {
         SecurityUser user = getSecurityUser();
         return user.getGroups();
+    }
+
+    /**
+     * Get the login of the current user authorities.
+     *
+     * @return the login of the current user authorities.
+     */
+    public static Set<SecurityAuthority> getCurrentUserAuthorities() {
+        return FortContextHolder.getContext().getAuthorities();
+    }
+
+    /**
+     * Get the login of the current user tree security navs.
+     *
+     * @return the login of the current user tree security navs.
+     */
+    public static List<TreeSecurityNav> getCurrentUserTreeSecurityNavs() {
+        return FortContextHolder.getContext().getNavs();
     }
 
     /**
