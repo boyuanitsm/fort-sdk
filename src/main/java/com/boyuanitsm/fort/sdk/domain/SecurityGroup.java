@@ -19,8 +19,6 @@ public class SecurityGroup extends AbstractAuditingEntity implements Serializabl
 
     private String st;
 
-    private SecurityApp app;
-
     private Set<SecurityUser> users = new HashSet<SecurityUser>();
 
     public Long getId() {
@@ -55,14 +53,6 @@ public class SecurityGroup extends AbstractAuditingEntity implements Serializabl
         this.st = st;
     }
 
-    public SecurityApp getApp() {
-        return app;
-    }
-
-    public void setApp(SecurityApp securityApp) {
-        this.app = securityApp;
-    }
-
     public Set<SecurityUser> getUsers() {
         return users;
     }
@@ -74,10 +64,11 @@ public class SecurityGroup extends AbstractAuditingEntity implements Serializabl
     @Override
     public String toString() {
         return "SecurityGroup{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", description='" + description + "'" +
-            ", st='" + st + "'" +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", st='" + st + '\'' +
+                ", users=" + users +
+                '}';
     }
 }

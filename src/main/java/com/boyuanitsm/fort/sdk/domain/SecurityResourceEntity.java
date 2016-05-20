@@ -25,8 +25,6 @@ public class SecurityResourceEntity extends AbstractAuditingEntity implements Se
 
     private String st;
 
-    private SecurityApp app;
-
     private Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
 
     public Long getId() {
@@ -77,14 +75,6 @@ public class SecurityResourceEntity extends AbstractAuditingEntity implements Se
         this.st = st;
     }
 
-    public SecurityApp getApp() {
-        return app;
-    }
-
-    public void setApp(SecurityApp securityApp) {
-        this.app = securityApp;
-    }
-
     public Set<SecurityAuthority> getAuthorities() {
         return authorities;
     }
@@ -96,12 +86,13 @@ public class SecurityResourceEntity extends AbstractAuditingEntity implements Se
     @Override
     public String toString() {
         return "SecurityResourceEntity{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", url='" + url + "'" +
-            ", description='" + description + "'" +
-            ", resourceType='" + resourceType + "'" +
-            ", st='" + st + "'" +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                ", description='" + description + '\'' +
+                ", resourceType=" + resourceType +
+                ", st='" + st + '\'' +
+                ", authorities=" + authorities +
+                '}';
     }
 }

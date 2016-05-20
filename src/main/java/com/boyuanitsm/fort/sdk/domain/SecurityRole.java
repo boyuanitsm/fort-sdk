@@ -19,8 +19,6 @@ public class SecurityRole extends AbstractAuditingEntity implements Serializable
 
     private String st;
 
-    private SecurityApp app;
-
     private Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
 
     private Set<SecurityUser> users = new HashSet<SecurityUser>();
@@ -57,14 +55,6 @@ public class SecurityRole extends AbstractAuditingEntity implements Serializable
         this.st = st;
     }
 
-    public SecurityApp getApp() {
-        return app;
-    }
-
-    public void setApp(SecurityApp securityApp) {
-        this.app = securityApp;
-    }
-
     public Set<SecurityAuthority> getAuthorities() {
         return authorities;
     }
@@ -84,10 +74,12 @@ public class SecurityRole extends AbstractAuditingEntity implements Serializable
     @Override
     public String toString() {
         return "SecurityRole{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", description='" + description + "'" +
-            ", st='" + st + "'" +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", st='" + st + '\'' +
+                ", authorities=" + authorities +
+                ", users=" + users +
+                '}';
     }
 }

@@ -19,8 +19,6 @@ public class SecurityAuthority extends AbstractAuditingEntity implements Seriali
 
     private String st;
 
-    private SecurityApp app;
-
     private Set<SecurityResourceEntity> resources = new HashSet<SecurityResourceEntity>();
 
     private Set<SecurityRole> roles = new HashSet<SecurityRole>();
@@ -57,14 +55,6 @@ public class SecurityAuthority extends AbstractAuditingEntity implements Seriali
         this.st = st;
     }
 
-    public SecurityApp getApp() {
-        return app;
-    }
-
-    public void setApp(SecurityApp securityApp) {
-        this.app = securityApp;
-    }
-
     public Set<SecurityResourceEntity> getResources() {
         return resources;
     }
@@ -84,10 +74,12 @@ public class SecurityAuthority extends AbstractAuditingEntity implements Seriali
     @Override
     public String toString() {
         return "SecurityAuthority{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", description='" + description + "'" +
-            ", st='" + st + "'" +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", st='" + st + '\'' +
+                ", resources=" + resources +
+                ", roles=" + roles +
+                '}';
     }
 }
