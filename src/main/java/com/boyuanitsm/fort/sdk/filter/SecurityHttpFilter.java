@@ -5,13 +5,8 @@ import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
-import com.boyuanitsm.fort.sdk.domain.SecurityAuthority;
-import com.boyuanitsm.fort.sdk.domain.SecurityResourceEntity;
-import com.boyuanitsm.fort.sdk.domain.SecurityRole;
-import com.boyuanitsm.fort.sdk.domain.SecurityUser;
+import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
-import org.apache.http.HttpException;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -119,6 +114,10 @@ public class SecurityHttpFilter implements Filter {
                     authorities.addAll(fullRole.getAuthorities());
                 }
                 context.setAuthorities(authorities);
+
+                // set tree navs
+                Set<SecurityNav> navs = cache.getSecurityNavsByAuthorities(authorities);
+                context.setNavs(TreeSecurityNav.build(navs));
 
                 // set session attribute
                 session.setAttribute(FortContextHolder.FORT_SESSION_NAME, context);

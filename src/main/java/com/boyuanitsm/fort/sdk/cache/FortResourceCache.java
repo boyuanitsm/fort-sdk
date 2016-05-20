@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * fort resource cache
+ * fort resource cache.
  *
  * @author zhanghua on 5/17/16.
  */
@@ -23,14 +23,29 @@ public class FortResourceCache {
 
     private FortClient fortClient;
 
+    /**
+     * resource entity cache. SecurityResourceEntity.id - SecurityResourceEntity
+     */
     private static Map<Long, SecurityResourceEntity> resourceEntityCache;
     /**
-     * resource url - id map
+     * resource url id map.  SecurityResourceEntity.url - SecurityResourceEntity.id.
      */
     private static Map<String, Long> resourceUrlIdMap;
+    /**
+     * nav cache. SecurityResourceEntity.id - SecurityNav.
+     */
     private static Map<Long, SecurityNav> navCache;
+    /**
+     * authority cache. SecurityAuthority.id - SecurityAuthority.
+     */
     private static Map<Long, SecurityAuthority> authorityCache;
+    /**
+     * role cache. SecurityRole.id - SecurityRole.
+     */
     private static Map<Long, SecurityRole> roleCache;
+    /**
+     * group cache. SecurityGroup.id - SecurityGroup.
+     */
     private static Map<Long, SecurityGroup> groupCache;
 
     @Autowired
@@ -72,7 +87,7 @@ public class FortResourceCache {
         // load navs
         List<SecurityNav> navs = fortClient.getAllSecurityNavs();
         for (SecurityNav nav: navs) {
-            navCache.put(nav.getId(), nav);
+            navCache.put(nav.getResource().getId(), nav);
         }
         // load authorities
         List<SecurityAuthority> authorities = fortClient.getAllAuthorities();
@@ -161,5 +176,23 @@ public class FortResourceCache {
 
     public SecurityRole getRole(Long id) {
         return roleCache.get(id);
+    }
+
+    public Set<SecurityNav> getSecurityNavsByAuthorities(Set<SecurityAuthority> authorities) {
+
+        Set<SecurityNav> navs = new HashSet<SecurityNav>();
+
+        for (SecurityAuthority authority: authorities) {
+            // get has relationship authority
+            authority = authorityCache.get(authority.getId());
+            for (SecurityResourceEntity resourceEntity: authority.getResources()) {
+                SecurityNav nav = navCache.get(resourceEntity.getId());
+                if (nav != null) {
+                    navs.add(nav);
+                }
+            }
+        }
+
+        return navs;
     }
 }
