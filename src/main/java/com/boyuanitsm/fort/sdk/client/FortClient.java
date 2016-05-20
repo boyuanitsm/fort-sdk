@@ -3,6 +3,7 @@ package com.boyuanitsm.fort.sdk.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
@@ -38,6 +39,8 @@ public class FortClient {
 
     private FortConfiguration configuration;
     private HttpClient httpClient;
+    @Autowired
+    private FortResourceCache cache;
 
     @Autowired
     public FortClient(FortConfiguration configuration) {
@@ -97,8 +100,9 @@ public class FortClient {
      */
     public void registerUser(SecurityUser user) throws IOException, HttpException {
         // set default role, group
-        user.setRoles(configuration.getUser().getDefaultRoles());
-        user.setGroups(configuration.getUser().getDefaultGroups());
+        user.setRoles(cache.getRolesByArrayNames(configuration.getUser().getDefaultRoles()));
+        user.setGroups(cache.getGroupsByArrayNames(configuration.getUser().getDefaultGroups()));
+        user.setActivated(true);
 
         httpClient.postJson(API_SECURITY_USERS, user);
     }

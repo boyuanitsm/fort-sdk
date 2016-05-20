@@ -150,57 +150,19 @@ public class FortConfiguration {
             String defaultRoles = userMap.get("default-roles");
             String defaultGroups = userMap.get("default-groups");
 
-            String[] roles = defaultRoles.split(",");
-            String[] groups = defaultGroups.split(",");
-
-            this.defaultRoles = new HashSet<SecurityRole>();
-            this.defaultGroups = new HashSet<SecurityGroup>();
-
-//            for (String name: roles) {
-//                name = name.trim();
-//                SecurityRole role = cache.getSecurityRoleByName(name);
-//                if (role == null) {
-//                    log.warn("user default role not found! name: {}", name);
-//                    continue;
-//                }
-//                this.defaultRoles.add(role);
-//            }
-//            for (String name: groups) {
-//                name = name.trim();
-//                SecurityGroup group = cache.getSecurityGroupByName(name);
-//                if (group == null) {
-//                    log.warn("user default group not found! name: {}", name);
-//                    continue;
-//                }
-//                this.defaultGroups.add(group);
-//            }
+            this.defaultRoles = defaultRoles.split(",");
+            this.defaultGroups = defaultGroups.split(",");
         }
 
-        private Set<SecurityRole> defaultRoles;
-        private Set<SecurityGroup> defaultGroups;
+        private final String[] defaultRoles;
+        private final String[] defaultGroups;
 
-        public Set<SecurityRole> getDefaultRoles() {
+        public String[] getDefaultRoles() {
             return defaultRoles;
         }
 
-        public void setDefaultRoles(Set<SecurityRole> defaultRoles) {
-            this.defaultRoles = defaultRoles;
-        }
-
-        public Set<SecurityGroup> getDefaultGroups() {
+        public String[] getDefaultGroups() {
             return defaultGroups;
-        }
-
-        public void setDefaultGroups(Set<SecurityGroup> defaultGroups) {
-            this.defaultGroups = defaultGroups;
-        }
-
-        @Override
-        public String toString() {
-            return "User{" +
-                    "defaultRoles=" + defaultRoles +
-                    ", defaultGroups=" + defaultGroups +
-                    '}';
         }
     }
 

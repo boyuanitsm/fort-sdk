@@ -195,4 +195,40 @@ public class FortResourceCache {
 
         return navs;
     }
+
+    public Set<SecurityRole> getRolesByArrayNames(String[] roleNames) {
+        Set<SecurityRole> roles = new HashSet<SecurityRole>();
+
+        Set<Long> keys = roleCache.keySet();
+
+        for (Long key: keys) {
+            SecurityRole role = roleCache.get(key);
+
+            for (int i = 0; i < roleNames.length; i++) {
+                if (role.getName().equals(roleNames[i])) {
+                    roles.add(role);
+                }
+            }
+        }
+
+        return roles;
+    }
+
+    public Set<SecurityGroup> getGroupsByArrayNames(String[] groupNames) {
+        Set<SecurityGroup> groups = new HashSet<SecurityGroup>();
+
+        Set<Long> keys = groupCache.keySet();
+
+        for (Long key: keys) {
+            SecurityGroup group = groupCache.get(key);
+
+            for (int i = 0; i < groupNames.length; i++) {
+                if (group.getName().equals(groupNames[i])) {
+                    groups.add(group);
+                }
+            }
+        }
+
+        return groups;
+    }
 }
