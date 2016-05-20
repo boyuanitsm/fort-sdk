@@ -1,5 +1,13 @@
 # fort sdk
 
+## 目录
+
+* 依赖
+    * 完整 maven pom
+* 配置 fort.yml
+* 配置 SecurityHttpFilter 拦截器
+* 启动 spring注解扫描
+
 ## 依赖
 
 *   jdk 7+
@@ -10,7 +18,7 @@
 *   alibaba fastjson 1.2.7
 *   snakeyaml 1.6
 
-### 完整 Maven pom
+### 完整 maven pom
 
 ```
 
@@ -26,6 +34,11 @@
             <version>3.1.0</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>4.2.5.RELEASE</version>
+        </dependency>
+        <dependency>
             <groupId>javax.websocket</groupId>
             <artifactId>javax.websocket-api</artifactId>
             <version>1.1</version>
@@ -34,11 +47,6 @@
             <groupId>org.glassfish.tyrus</groupId>
             <artifactId>tyrus-container-grizzly-client</artifactId>
             <version>1.8.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-websocket</artifactId>
-            <version>4.2.5.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -51,14 +59,6 @@
             <version>2.5.3</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- http://mvnrepository.com/artifact/commons-io/commons-io -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>4.2.5.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- http://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
