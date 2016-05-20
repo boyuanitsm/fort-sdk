@@ -82,11 +82,13 @@ public class SecurityNav extends AbstractAuditingEntity implements Serializable 
     @Override
     public String toString() {
         return "SecurityNav{" +
-            "id=" + id +
-            ", name='" + name + "'" +
-            ", icon='" + icon + "'" +
-            ", description='" + description + "'" +
-            ", st='" + st + "'" +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", description='" + description + '\'' +
+                ", st='" + st + '\'' +
+                ", parent=" + parent +
+                ", resource=" + resource +
+                '}';
     }
 }
