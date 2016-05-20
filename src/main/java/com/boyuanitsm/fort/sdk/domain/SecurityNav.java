@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * A SecurityNav.
  */
-public class SecurityNav extends AbstractAuditingEntity implements Serializable {
+public class SecurityNav implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

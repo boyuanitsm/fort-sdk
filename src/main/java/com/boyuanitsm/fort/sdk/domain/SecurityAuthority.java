@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * A SecurityAuthority.
  */
-public class SecurityAuthority extends AbstractAuditingEntity implements Serializable {
+public class SecurityAuthority implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

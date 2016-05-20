@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * A SecurityLoginEvent.
  */
-public class SecurityLoginEvent extends AbstractAuditingEntity implements Serializable {
+public class SecurityLoginEvent implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

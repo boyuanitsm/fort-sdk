@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * A SecurityResourceEntity.
  */
-public class SecurityResourceEntity extends AbstractAuditingEntity implements Serializable {
+public class SecurityResourceEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * A SecurityGroup.
  */
-public class SecurityGroup extends AbstractAuditingEntity implements Serializable {
+public class SecurityGroup implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
