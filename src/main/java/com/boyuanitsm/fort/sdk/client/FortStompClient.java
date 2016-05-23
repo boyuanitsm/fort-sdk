@@ -1,7 +1,6 @@
 package com.boyuanitsm.fort.sdk.client;
 
 
-import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +36,14 @@ public class FortStompClient {
     @Autowired
     private FortResourceCache cache;
 
-    public FortStompClient() {
+    @Autowired
+    public FortStompClient(FortClient client) {
         List<Transport> transports = new ArrayList<Transport>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
         transports.add(new RestTemplateXhrTransport());
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Cookie", "remember-me=dGRIenFCUHNLRjluM29RZHJDRlFodz09OkM4eVFES3M5Nmg0MFp2bVUvSmkzbUE9PQ; JSESSIONID=6D864A078A8C61BBF6CC25AE821101CA;");
+        headers.add("Cookie", client.getCookieString());
 
         SockJsClient sockJsClient = new SockJsClient(transports);
 

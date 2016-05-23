@@ -8,6 +8,8 @@ import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import org.apache.http.HttpException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,13 +44,14 @@ public class FortClient {
     private HttpClient httpClient;
     @Autowired
     private FortResourceCache cache;
+    private CookieStore cookieStore;
 
     @Autowired
     public FortClient(FortConfiguration configuration) {
         this.configuration = configuration;
         httpClient = new HttpClient(configuration.getApp().getServerBase());
         try {
-            loginFortSecurityServer(configuration.getApp().getAppKey(), configuration.getApp().getAppSecret());
+            this.cookieStore = loginFortSecurityServer(configuration.getApp().getAppKey(), configuration.getApp().getAppSecret());
         } catch (Exception e) {
             throw new RuntimeException("login fort context server error!", e);
         }
@@ -61,8 +65,8 @@ public class FortClient {
      * @throws IOException
      * @throws HttpException
      */
-    private void loginFortSecurityServer(String appKey, String secret) throws IOException, HttpException {
-        httpClient.postForm(API_AUTHENTICATION,
+    private CookieStore loginFortSecurityServer(String appKey, String secret) throws IOException, HttpException {
+        return httpClient.loginFortSecurityServer(API_AUTHENTICATION,
                 new BasicNameValuePair("j_username", appKey),
                 new BasicNameValuePair("j_password", secret),
                 new BasicNameValuePair("remember-me", "true"),
@@ -174,5 +178,19 @@ public class FortClient {
     public List<SecurityGroup> getAllGroups() throws IOException, HttpException {
         String content = httpClient.get(API_SECURITY_GROUPS);
         return JSONArray.parseArray(content, SecurityGroup.class);
+    }
+
+    public CookieStore getCookieStore() {
+        return cookieStore;
+    }
+
+    public String getCookieString() {
+        String cookieString = "";
+
+        for (Cookie cookie: cookieStore.getCookies()) {
+            cookieString += cookie.getName() + "=" + cookie.getValue() + ";";
+        }
+
+        return cookieString;
     }
 }

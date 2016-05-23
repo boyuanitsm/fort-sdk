@@ -36,7 +36,6 @@ public class HttpClient {
     HttpClient(String baseUrl) {
         this.baseUrl = baseUrl;
         context.setCookieStore(cookieStore);
-        // getCsrfToken();
     }
 
     private String baseUrl;
@@ -45,22 +44,9 @@ public class HttpClient {
     private HttpClientContext context = HttpClientContext.create();
     private CookieStore cookieStore = new BasicCookieStore();
 
-    /**
-     * access home view, get csrf token and cookie(JSESSIONID)
-     */
-    private void getCsrfToken() {
-        HttpGet get = new HttpGet(baseUrl);
-        try {
-            CloseableHttpResponse response  = httpClient.execute(get, context);
-
-            isSuccess(response.getStatusLine().getStatusCode(), null);
-
-            for (Cookie cookie : cookieStore.getCookies()) {
-                log.debug("Fort received Cookie: {}: {}", cookie.getName(), cookie.getValue());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    CookieStore loginFortSecurityServer(String url, BasicNameValuePair... pairs) throws IOException, HttpException {
+        postForm(url, pairs);
+        return cookieStore;
     }
 
     /**
