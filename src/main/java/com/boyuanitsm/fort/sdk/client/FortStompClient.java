@@ -3,6 +3,7 @@ package com.boyuanitsm.fort.sdk.client;
 
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
+import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SuccessCallback;
@@ -19,9 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author zhanghua on 5/11/16.
+ * fort stomp client. subscribe on update security resource.
+ *
+ * @author zhanghua on 5/22/16.
  */
-public class WebSocketSTOMPClient {
+@Component
+public class FortStompClient {
 
     public static void main(String[] args) throws Exception {
         List<Transport> transports = new ArrayList<Transport>(2);
