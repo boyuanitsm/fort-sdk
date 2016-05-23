@@ -82,7 +82,7 @@ public class FortResourceCache {
      * @throws HttpException
      */
     private void load() throws IOException, HttpException{
-        log.debug("Starting Fort");
+        log.info("Starting fort");
         long t1 = System.currentTimeMillis();
 
         initCache();
@@ -114,7 +114,7 @@ public class FortResourceCache {
             groupCache.put(group.getId(), group);
         }
 
-        log.debug("Started Fort in {} ms", System.currentTimeMillis() - t1);
+        log.info("Started fort in {} ms", System.currentTimeMillis() - t1);
     }
 
     /**
@@ -263,6 +263,8 @@ public class FortResourceCache {
             // warning: we don't have this resource class
             log.warn("We don't have this resource class: {}", resourceClass);
         }
+
+        log.info("Updated security resource! {}", onUpdateSecurityResource);
     }
 
     /**

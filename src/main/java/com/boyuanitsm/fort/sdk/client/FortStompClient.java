@@ -62,11 +62,11 @@ public class FortStompClient {
 
         future.addCallback(new SuccessCallback<StompSession>() {
             public void onSuccess(StompSession stompSession) {
-                log.info("login fort web socket stomp server success!");
+                log.info("Login fort web socket stomp server success!");
             }
         }, new FailureCallback() {
             public void onFailure(Throwable throwable) {
-                log.info("login fort web socket stomp server failure!");
+                log.info("Login fort web socket stomp server error!");
             }
         });
     }

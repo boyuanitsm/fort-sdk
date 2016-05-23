@@ -53,7 +53,7 @@ public class FortClient {
         try {
             this.cookieStore = loginFortSecurityServer(configuration.getApp().getAppKey(), configuration.getApp().getAppSecret());
         } catch (Exception e) {
-            throw new RuntimeException("login fort context server error!", e);
+            throw new RuntimeException("Login fort server error!", e);
         }
     }
 
