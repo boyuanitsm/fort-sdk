@@ -83,8 +83,12 @@ public class FortStompClient {
 
                 @Override
                 public void handleFrame(StompHeaders stompHeaders, Object o) {
-                    OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
-                    cache.updateResource(onUpdateSecurityResource);
+                    try {
+                        OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
+                        cache.updateResource(onUpdateSecurityResource);
+                    } catch (Exception e) {
+                        log.error("Update security resource error! {}", o, e);
+                    }
                 }
             });
         }

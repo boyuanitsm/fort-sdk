@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass.*;
-import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.DELETE;
-import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.POST;
-import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.PUT;
+import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.*;
 
 /**
  * fort resource cache. cache resource entity, nav, authority, role, group.
@@ -325,7 +323,9 @@ public class FortResourceCache {
         SecurityNav nav = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityNav.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
-            navCache.put(nav.getResource().getId(), nav);
+            if (nav.getResource() != null) {
+                navCache.put(nav.getResource().getId(), nav);
+            }
         } else if (DELETE.equals(option)) {
             navCache.remove(nav.getResource().getId());
         }
@@ -371,4 +371,5 @@ public class FortResourceCache {
             resourceUrlIdMap.remove(removeKey);
         }
     }
+
 }
