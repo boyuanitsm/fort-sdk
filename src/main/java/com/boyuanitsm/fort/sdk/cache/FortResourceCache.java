@@ -5,6 +5,7 @@ import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption;
 import com.boyuanitsm.fort.sdk.client.FortClient;
+import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
 import org.apache.http.HttpException;
 import org.slf4j.Logger;
@@ -372,4 +373,23 @@ public class FortResourceCache {
         }
     }
 
+    /**
+     * get fort context by user.
+     *
+     * @param user the user
+     * @return fort context
+     */
+    public FortContext getFortContext(SecurityUser user) {
+        return null;
+    }
+
+    /**
+     * get fort context by user token
+     *
+     * @param userToken the user token
+     * @return fort context
+     */
+    public FortContext getFortContext(String userToken) {
+        return null;
+    }
 }
