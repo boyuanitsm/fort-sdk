@@ -1,6 +1,10 @@
 package com.boyuanitsm.fort.sdk.client;
 
 
+import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
+import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
+import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.stereotype.Component;
@@ -27,19 +31,25 @@ import java.util.List;
 @Component
 public class FortStompClient {
 
-    public static void main(String[] args) throws Exception {
+    @Autowired
+    private FortConfiguration configuration;
+
+    @Autowired
+    private FortResourceCache cache;
+
+    public FortStompClient() {
         List<Transport> transports = new ArrayList<Transport>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
         transports.add(new RestTemplateXhrTransport());
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Cookie", "JSESSIONID=26D343966A35EA2DD183A63CED65F344; remember-me=QnFCM0tHU09CQlpudzg1aU1EbEY3UT09OnRqTVlrQUNIbEF4UjNvdTRoaXNmQXc9PQ; NG_TRANSLATE_LANG_KEY=%22en%22; CSRF-TOKEN=fcfa7528-094f-4e86-aa03-2a5745fce2f6");
+        headers.add("Cookie", "remember-me=dGRIenFCUHNLRjluM29RZHJDRlFodz09OkM4eVFES3M5Nmg0MFp2bVUvSmkzbUE9PQ; JSESSIONID=6D864A078A8C61BBF6CC25AE821101CA;");
 
         SockJsClient sockJsClient = new SockJsClient(transports);
 
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
         stompClient.setMessageConverter(new StringMessageConverter());
-        ListenableFuture<StompSession> future = stompClient.connect("ws://localhost:8080/client/greetings", headers, new MyWebSocketHandler());
+        ListenableFuture<StompSession> future = stompClient.connect("ws://localhost:8080/websocket/sa", headers, new MyWebSocketHandler());
 
         future.addCallback(new SuccessCallback<StompSession>() {
             public void onSuccess(StompSession stompSession) {
@@ -50,17 +60,13 @@ public class FortStompClient {
                 System.out.println("on Failure!");
             }
         });
-
-        Thread.sleep(100000000);
     }
 
-    private static class MyWebSocketHandler implements StompSessionHandler {
+    private class MyWebSocketHandler implements StompSessionHandler {
 
 
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
-            // stompSession.send("/topic/hello", "java client");
-
-            stompSession.subscribe("/topic/admin/greetings", new StompFrameHandler() {
+            stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders stompHeaders) {
                     return String.class;
@@ -87,8 +93,6 @@ public class FortStompClient {
         }
 
         public void handleFrame(StompHeaders stompHeaders, Object o) {
-            // System.out.println(stompHeaders);
-            System.out.println(o);
         }
     }
 
