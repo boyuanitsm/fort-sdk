@@ -1,6 +1,9 @@
 package com.boyuanitsm.fort.sdk.cache;
 
+import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
+import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass;
+import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.domain.*;
 import org.apache.http.HttpException;
@@ -12,8 +15,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.*;
 
+import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass.*;
+import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.DELETE;
+import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.POST;
+import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption.PUT;
+
 /**
- * fort resource cache.
+ * fort resource cache. cache resource entity, nav, authority, role, group.
  *
  * @author zhanghua on 5/17/16.
  */
@@ -233,7 +241,132 @@ public class FortResourceCache {
         return groups;
     }
 
+    /**
+     * Update resource. when fort server on update resource. cache sync update resource.
+     *
+     * @param onUpdateSecurityResource the entity
+     */
     public void updateResource(OnUpdateSecurityResource onUpdateSecurityResource) {
+        // get resource class enum
+        OnUpdateSecurityResourceClass resourceClass = onUpdateSecurityResource.getResourceClass();
+        if (SECURITY_RESOURCE_ENTITY.equals(resourceClass)) {// update resource entity
+            updateResourceEntity(onUpdateSecurityResource);
+        } else if (SECURITY_NAV.equals(resourceClass)) {// update nav
+            updateNav(onUpdateSecurityResource);
+        } else if (SECURITY_AUTHORITY.equals(resourceClass)) {// update authority
+            updateAuthority(onUpdateSecurityResource);
+        } else if (SECURITY_GROUP.equals(resourceClass)) {// update group
+            updateGroup(onUpdateSecurityResource);
+        } else if (SECURITY_ROLE.equals(resourceClass)) {// update role
+            updateRole(onUpdateSecurityResource);
+        } else {
+            // warning: we don't have this resource class
+            log.warn("We don't have this resource class: {}", resourceClass);
+        }
+    }
 
+    /**
+     * Update role.
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateRole(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityRole role = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityRole.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            roleCache.put(role.getId(), role);
+        } else if (DELETE.equals(option)) {
+            roleCache.remove(role.getId());
+        }
+    }
+
+    /**
+     * Update group
+     *
+     * @param onUpdateSecurityResource the on update group.
+     */
+    private void updateGroup(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityGroup group = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityGroup.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            groupCache.put(group.getId(), group);
+        } else if (DELETE.equals(option)) {
+            groupCache.remove(group.getId());
+        }
+    }
+
+    /**
+     * Update authority
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateAuthority(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityAuthority authority = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityAuthority.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            authorityCache.put(authority.getId(), authority);
+        } else if (DELETE.equals(option)) {
+            authorityCache.remove(authority.getId());
+        }
+    }
+
+    /**
+     * Update nav.
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateNav(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityNav nav = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityNav.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            navCache.put(nav.getResource().getId(), nav);
+        } else if (DELETE.equals(option)) {
+            navCache.remove(nav.getResource().getId());
+        }
+    }
+
+    /**
+     * Update resource entity.
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateResourceEntity(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityResourceEntity resource = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityResourceEntity.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            resourceEntityCache.put(resource.getId(), resource);
+            removeResourceUrlIdMapById(resource.getId());
+            resourceUrlIdMap.put(resource.getUrl(), resource.getId());
+        } else if (DELETE.equals(option)) {
+            resourceEntityCache.remove(resource.getId());
+            removeResourceUrlIdMapById(resource.getId());
+        }
+    }
+
+    /**
+     * remove resourceUrlIdMap by id, because url id updatable so foreach remove.
+     *
+     * @param resourceId the id of the SecurityResourceEntity
+     */
+    private void removeResourceUrlIdMapById(Long resourceId) {
+        // remove from resource url id map
+        // find key
+        String removeKey = null;
+        for (String url: resourceUrlIdMap.keySet()) {
+            Long id = resourceUrlIdMap.get(url);
+            if (id.equals(resourceId)) {
+                removeKey = url;
+                break;
+            }
+        }
+        // remove if not null
+        if (removeKey != null) {
+            resourceUrlIdMap.remove(removeKey);
+        }
     }
 }
