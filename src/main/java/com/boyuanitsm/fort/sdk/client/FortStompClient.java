@@ -1,8 +1,13 @@
 package com.boyuanitsm.fort.sdk.client;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
@@ -30,6 +35,8 @@ import java.util.List;
 @Component
 public class FortStompClient {
 
+    private final Logger log = LoggerFactory.getLogger(FortClient.class);
+
     @Autowired
     private FortConfiguration configuration;
 
@@ -37,7 +44,9 @@ public class FortStompClient {
     private FortResourceCache cache;
 
     @Autowired
-    public FortStompClient(FortClient client) {
+    public FortStompClient(FortClient client, FortConfiguration configuration) {
+        this.configuration = configuration;
+
         List<Transport> transports = new ArrayList<Transport>(2);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
         transports.add(new RestTemplateXhrTransport());
@@ -49,15 +58,15 @@ public class FortStompClient {
 
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
         stompClient.setMessageConverter(new StringMessageConverter());
-        ListenableFuture<StompSession> future = stompClient.connect("ws://localhost:8080/websocket/sa", headers, new MyWebSocketHandler());
+        ListenableFuture<StompSession> future = stompClient.connect(configuration.getApp().getWebsocketServerBase() + "/websocket/sa", headers, new MyWebSocketHandler());
 
         future.addCallback(new SuccessCallback<StompSession>() {
             public void onSuccess(StompSession stompSession) {
-                System.out.println("on Success!");
+                log.info("login fort web socket stomp server success!");
             }
         }, new FailureCallback() {
             public void onFailure(Throwable throwable) {
-                System.out.println("on Failure!");
+                log.info("login fort web socket stomp server failure!");
             }
         });
     }
@@ -74,8 +83,8 @@ public class FortStompClient {
 
                 @Override
                 public void handleFrame(StompHeaders stompHeaders, Object o) {
-                    System.out.println(stompHeaders);
-                    System.out.println(o);
+                    OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
+                    cache.updateResource(onUpdateSecurityResource);
                 }
             });
         }

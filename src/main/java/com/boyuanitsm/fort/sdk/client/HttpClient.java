@@ -60,7 +60,7 @@ public class HttpClient {
      */
     String postForm(String url, BasicNameValuePair... pairs) throws IOException, HttpException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
-        log.debug("full post url: {}, post form params: {}", fullPostUrl, Arrays.toString(pairs));
+        // log.debug("full post url: {}, post form params: {}", fullPostUrl, Arrays.toString(pairs));
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set form entity
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -81,7 +81,7 @@ public class HttpClient {
      */
     String postJson(String url, JSON json) throws IOException, HttpException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
-        log.debug("full post url: {}, post json: {}", fullPostUrl, json);
+        // log.debug("full post url: {}, post json: {}", fullPostUrl, json);
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set json string entity
         post.setEntity(new StringEntity(json.toJSONString()));
@@ -117,7 +117,7 @@ public class HttpClient {
      */
     String putJson(String url, JSON json) throws IOException, HttpException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
-        log.debug("full put url: {}, put json: {}", fullPostUrl, json);
+        // log.debug("full put url: {}, put json: {}", fullPostUrl, json);
         HttpPut put = new HttpPut(fullPostUrl.toString());
         // set json string entity
         put.setEntity(new StringEntity(json.toJSONString()));
@@ -155,7 +155,7 @@ public class HttpClient {
             url += "?";
         }
         StringBuffer fullGetUrl = new StringBuffer().append(baseUrl).append(url).append(urlParams);
-        log.debug("full get url : {}", fullGetUrl);
+        // log.debug("full get url : {}", fullGetUrl);
 
         HttpGet get = new HttpGet(fullGetUrl.toString());
         return send(get);
@@ -163,7 +163,7 @@ public class HttpClient {
 
     String delete(String url) throws IOException, HttpException {
         StringBuffer fullDeleteUrl = new StringBuffer().append(baseUrl).append(url);
-        log.debug("full delete url : {}", fullDeleteUrl);
+        // log.debug("full delete url : {}", fullDeleteUrl);
         HttpDelete delete = new HttpDelete(fullDeleteUrl.toString());
         return send(delete);
     }
@@ -186,7 +186,7 @@ public class HttpClient {
         isSuccess(response.getStatusLine().getStatusCode(), null);
         // get response content
         String content = EntityUtils.toString(response.getEntity());
-        log.info(content);
+        // log.info(content);
         // close response
         response.close();
         return content;

@@ -1,5 +1,6 @@
 package com.boyuanitsm.fort.sdk.cache;
 
+import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.domain.*;
 import org.apache.http.HttpException;
@@ -230,5 +231,9 @@ public class FortResourceCache {
         }
 
         return groups;
+    }
+
+    public void updateResource(OnUpdateSecurityResource onUpdateSecurityResource) {
+
     }
 }

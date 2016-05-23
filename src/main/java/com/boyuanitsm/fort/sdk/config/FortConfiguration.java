@@ -41,14 +41,21 @@ public class FortConfiguration {
             this.serverBase = appMap.get("server-base");
             this.appKey = appMap.get("app-key");
             this.appSecret = appMap.get("app-secret");
+
+            this.websocketServerBase = "ws" + serverBase.substring(serverBase.indexOf(":"), serverBase.length());
         }
 
         private final String serverBase;
+        private final String websocketServerBase;
         private final String appKey;
         private final String appSecret;
 
         public String getServerBase() {
             return serverBase;
+        }
+
+        public String getWebsocketServerBase() {
+            return websocketServerBase;
         }
 
         public String getAppKey() {
@@ -63,6 +70,7 @@ public class FortConfiguration {
         public String toString() {
             return "App{" +
                     "serverBase='" + serverBase + '\'' +
+                    ", websocketServerBase='" + websocketServerBase + '\'' +
                     ", appKey='" + appKey + '\'' +
                     ", appSecret='" + appSecret + '\'' +
                     '}';

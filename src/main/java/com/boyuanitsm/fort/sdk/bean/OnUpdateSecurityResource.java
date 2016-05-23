@@ -58,4 +58,13 @@ public class OnUpdateSecurityResource {
     public void setData(Object data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "OnUpdateSecurityResource{" +
+                "option=" + option +
+                ", resourceClass=" + resourceClass +
+                ", data=" + data +
+                '}';
+    }
 }
