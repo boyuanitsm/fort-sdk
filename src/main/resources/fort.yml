@@ -11,8 +11,8 @@
 fort:
     app:
         server-base: http://localhost:8080
-        app-key: soqcnpjhxqku
-        app-secret: 6ddeh9nrgtjd
+        app-key: ppvssdiwes3b
+        app-secret: rja3imicjdy6
     authentication:
         unauthorized-return: /unauthorized.html
         login:
