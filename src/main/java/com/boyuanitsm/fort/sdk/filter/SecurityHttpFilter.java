@@ -60,7 +60,7 @@ public class SecurityHttpFilter implements Filter {
             handler.login(request, response);
             return;
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
-            handler.logout(request, response);
+            handler.logout(response);
             return;
         } else {
             Long resourceId = cache.getResourceId(requestUri);
@@ -133,15 +133,14 @@ public class SecurityHttpFilter implements Filter {
         }
 
         /**
-         * logout handler. remove session attribute FortContextHolder.FORT_SESSION_NAME.
+         * logout handler. remove cookie JSESSIONID FUSERTOKEN
          *
-         * @param request  http servlet request
          * @param response http servlet response
          * @throws IOException
          */
-        private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            HttpSession session = request.getSession();
-            session.removeAttribute(FortContextHolder.FORT_SESSION_NAME);
+        private void logout(HttpServletResponse response) throws IOException {
+            response.addHeader("Set-Cookie", "JSESSIONID=; Path=/; HttpOnly");
+            response.addHeader("Set-Cookie", "FUSERTOKEN=; Path=/; HttpOnly");
             response.sendRedirect(configuration.getLogout().getSuccessReturn());
         }
 
