@@ -4,7 +4,6 @@ import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContext;
-import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import org.slf4j.Logger;
@@ -18,8 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import static com.boyuanitsm.fort.sdk.config.Constants.*;
+import static com.boyuanitsm.fort.sdk.context.FortContextHolder.setContext;
 
 /**
  * Security Http Filter
@@ -93,10 +94,10 @@ public class SecurityHttpFilter implements Filter {
          * @throws IOException
          */
         private void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            String login = request.getParameter("f_username");
-            String password = request.getParameter("f_password");
+            String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
+            String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
             try {
-                SecurityUser user = client.authorization(login, password, request.getRemoteAddr(), request.getHeader("User-Agent"));
+                SecurityUser user = client.authorization(login, password, request.getRemoteAddr(), request.getHeader(USERAGENT));
 
                 HttpSession session = request.getSession();
                 // create empty context
@@ -120,7 +121,9 @@ public class SecurityHttpFilter implements Filter {
                 context.setNavs(TreeSecurityNav.build(navs));
 
                 // set session attribute
-                session.setAttribute(FortContextHolder.FORT_SESSION_NAME, context);
+                session.setAttribute(FORT_SESSION_NAME, context);
+
+                response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
 
                 // login success, redirect to success return
                 response.sendRedirect(configuration.getLogin().getSuccessReturn());
@@ -133,14 +136,14 @@ public class SecurityHttpFilter implements Filter {
         }
 
         /**
-         * logout handler. remove cookie JSESSIONID FUSERTOKEN
+         * logout handler. remove cookie JSESSIONID FORT_USER_TOKEN_COOKIE_NAME
          *
          * @param response http servlet response
          * @throws IOException
          */
         private void logout(HttpServletResponse response) throws IOException {
             response.addHeader("Set-Cookie", "JSESSIONID=; Path=/; HttpOnly");
-            response.addHeader("Set-Cookie", "FUSERTOKEN=; Path=/; HttpOnly");
+            response.addHeader("Set-Cookie", String.format("%s=; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME));
             response.sendRedirect(configuration.getLogout().getSuccessReturn());
         }
 
@@ -150,17 +153,17 @@ public class SecurityHttpFilter implements Filter {
          * @param request http servlet request
          */
         private void setFortContext(HttpServletRequest request) {
-            Object attr = request.getSession().getAttribute(FortContextHolder.FORT_SESSION_NAME);
+            Object attr = request.getSession().getAttribute(FORT_SESSION_NAME);
             if (attr != null) {
-                FortContextHolder.setContext((FortContext) attr);
+                setContext((FortContext) attr);
             } else {
-                FortContextHolder.setContext(FortContext.createEmptyContext());
+                setContext(FortContext.createEmptyContext());
             }
         }
 
         private void authentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Long resourceId) throws IOException, ServletException {
             // setFortContext(request);
-            Object attr = request.getSession().getAttribute(FortContextHolder.FORT_SESSION_NAME);
+            Object attr = request.getSession().getAttribute(FORT_SESSION_NAME);
 
             if (attr == null) {
                 // no logged, redirect to login view
@@ -177,8 +180,8 @@ public class SecurityHttpFilter implements Filter {
             Set<SecurityAuthority> userAuthorities = context.getAuthorities();
 
             boolean isAllow = false;
-            for (SecurityAuthority authority: authorities) {
-                for (SecurityAuthority userAuthority: userAuthorities) {
+            for (SecurityAuthority authority : authorities) {
+                for (SecurityAuthority userAuthority : userAuthorities) {
                     if (authority.getId().equals(userAuthority.getId())) {
                         isAllow = true;
                         break;

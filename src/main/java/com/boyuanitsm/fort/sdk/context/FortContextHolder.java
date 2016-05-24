@@ -7,8 +7,6 @@ package com.boyuanitsm.fort.sdk.context;
  */
 public class FortContextHolder {
 
-    public static final String FORT_SESSION_NAME = "FORT_CONTENT";
-
     private static FortContext context;
 
     public static FortContext getContext() {
