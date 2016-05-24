@@ -1,6 +1,7 @@
 package com.boyuanitsm.fort.sdk.domain;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +22,13 @@ public class SecurityUser implements Serializable {
 
     private Boolean activated;
 
-    private String st;
+    private String ipAddress;
+
+    private String userAgent;
+
+    private String token;
+
+    private Date tokenOverdueTime;
 
     private Set<SecurityRole> roles = new HashSet<SecurityRole>();
 
@@ -67,14 +74,6 @@ public class SecurityUser implements Serializable {
         this.activated = activated;
     }
 
-    public String getSt() {
-        return st;
-    }
-
-    public void setSt(String st) {
-        this.st = st;
-    }
-
     public Set<SecurityRole> getRoles() {
         return roles;
     }
@@ -91,6 +90,42 @@ public class SecurityUser implements Serializable {
         this.groups = securityGroups;
     }
 
+    public Boolean getActivated() {
+        return activated;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Date getTokenOverdueTime() {
+        return tokenOverdueTime;
+    }
+
+    public void setTokenOverdueTime(Date tokenOverdueTime) {
+        this.tokenOverdueTime = tokenOverdueTime;
+    }
+
     @Override
     public String toString() {
         return "SecurityUser{" +
@@ -99,7 +134,10 @@ public class SecurityUser implements Serializable {
                 ", passwordHash='" + passwordHash + '\'' +
                 ", email='" + email + '\'' +
                 ", activated=" + activated +
-                ", st='" + st + '\'' +
+                ", ipAddress='" + ipAddress + '\'' +
+                ", userAgent='" + userAgent + '\'' +
+                ", token='" + token + '\'' +
+                ", tokenOverdueTime=" + tokenOverdueTime +
                 ", roles=" + roles +
                 ", groups=" + groups +
                 '}';

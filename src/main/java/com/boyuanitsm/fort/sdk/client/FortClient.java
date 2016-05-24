@@ -81,10 +81,12 @@ public class FortClient {
      * @throws IOException
      * @throws HttpException
      */
-    public SecurityUser authorization(String login, String password) throws IOException, HttpException {
+    public SecurityUser authorization(String login, String password, String ipAddress, String userAgent) throws IOException, HttpException {
         JSONObject obj = new JSONObject();
         obj.put("login", login);
         obj.put("passwordHash", password);
+        obj.put("ipAddress", ipAddress);
+        obj.put("userAgent", userAgent);
         try {
             String content = httpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
             return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);

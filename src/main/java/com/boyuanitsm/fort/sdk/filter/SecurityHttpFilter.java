@@ -96,7 +96,7 @@ public class SecurityHttpFilter implements Filter {
             String login = request.getParameter("f_username");
             String password = request.getParameter("f_password");
             try {
-                SecurityUser user = client.authorization(login, password);
+                SecurityUser user = client.authorization(login, password, request.getRemoteAddr(), request.getHeader("User-Agent"));
 
                 HttpSession session = request.getSession();
                 // create empty context
