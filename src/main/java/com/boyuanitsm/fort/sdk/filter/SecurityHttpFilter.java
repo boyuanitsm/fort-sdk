@@ -58,7 +58,7 @@ public class SecurityHttpFilter implements Filter {
         handler.setFortContext(request);
 
         if (configuration.getLogin().getUrl().equals(requestUri)) {
-            handler.login(request, response);
+            handler.signIn(request, response);
             return;
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
             handler.logout(response);
@@ -87,17 +87,17 @@ public class SecurityHttpFilter implements Filter {
     private class AuthenticationHandler {
 
         /**
-         * login handler. login is form parameter f_username. password is form parameter f_password.
+         * signIn handler. signIn is form parameter f_username. password is form parameter f_password.
          *
          * @param request  http servlet request
          * @param response http servlet response
          * @throws IOException
          */
-        private void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        private void signIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
             String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
             String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
             try {
-                SecurityUser user = client.authorization(login, password, request.getRemoteAddr(), request.getHeader(USERAGENT));
+                SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USERAGENT));
 
                 HttpSession session = request.getSession();
                 // create empty context
@@ -125,13 +125,13 @@ public class SecurityHttpFilter implements Filter {
 
                 response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
 
-                // login success, redirect to success return
+                // signIn success, redirect to success return
                 response.sendRedirect(configuration.getLogin().getSuccessReturn());
             } catch (FortAuthenticationException e) {
-                // login or password error, redirect to error return
+                // signIn or password error, redirect to error return
                 response.sendRedirect(configuration.getLogin().getErrorReturn());
             } catch (Exception e) {
-                log.error("login error", e);
+                log.error("signIn error", e);
             }
         }
 
@@ -166,7 +166,7 @@ public class SecurityHttpFilter implements Filter {
             Object attr = request.getSession().getAttribute(FORT_SESSION_NAME);
 
             if (attr == null) {
-                // no logged, redirect to login view
+                // no logged, redirect to signIn view
                 response.sendRedirect(configuration.getLogin().getLoginView());
                 return;
             }

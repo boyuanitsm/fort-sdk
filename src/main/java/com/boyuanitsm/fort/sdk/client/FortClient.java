@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,7 +37,7 @@ public class FortClient {
     private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
     private static final String API_SECURITY_GROUPS = "/api/security-groups";
     private static final String API_SECURITY_USERS = "/api/security-users";
-    private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
+    private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/signIn";
 
     private FortConfiguration configuration;
     private HttpClient httpClient;
@@ -74,14 +73,14 @@ public class FortClient {
     }
 
     /**
-     * authorization access this app server
+     * signIn access this app server
      *
      * @param login not null
      * @param password not null, raw password
      * @throws IOException
      * @throws HttpException
      */
-    public SecurityUser authorization(String login, String password, String ipAddress, String userAgent) throws IOException, HttpException {
+    public SecurityUser signIn(String login, String password, String ipAddress, String userAgent) throws IOException, HttpException {
         JSONObject obj = new JSONObject();
         obj.put("login", login);
         obj.put("passwordHash", password);
@@ -104,7 +103,7 @@ public class FortClient {
      * @throws IOException
      * @throws HttpException
      */
-    public void registerUser(SecurityUser user) throws IOException, HttpException {
+    public void signUp(SecurityUser user) throws IOException, HttpException {
         // set default role, group
         user.setRoles(cache.getRolesByArrayNames(configuration.getUser().getDefaultRoles()));
         user.setGroups(cache.getGroupsByArrayNames(configuration.getUser().getDefaultGroups()));
@@ -182,11 +181,7 @@ public class FortClient {
         return JSONArray.parseArray(content, SecurityGroup.class);
     }
 
-    public CookieStore getCookieStore() {
-        return cookieStore;
-    }
-
-    public String getCookieString() {
+    String getCookieString() {
         String cookieString = "";
 
         for (Cookie cookie: cookieStore.getCookies()) {
