@@ -56,6 +56,11 @@ public class FortResourceCache {
      */
     private static Map<Long, SecurityGroup> groupCache;
 
+    /**
+     * logged user cache. SecurityUser.token - SecurityUser.
+     */
+    private static Map<String, SecurityUser> loggedUserCache;
+
     @Autowired
     public FortResourceCache(FortClient fortClient) throws IOException, HttpException {
         this.fortClient = fortClient;// autowired fort client
@@ -72,6 +77,7 @@ public class FortResourceCache {
         authorityCache = new HashMap<Long, SecurityAuthority>();
         roleCache = new HashMap<Long, SecurityRole>();
         groupCache = new HashMap<Long, SecurityGroup>();
+        loggedUserCache = new HashMap<String, SecurityUser>();
     }
 
     /**
@@ -374,22 +380,63 @@ public class FortResourceCache {
     }
 
     /**
+     * update logged user cache.
+     *
+     * @param user the user.
+     */
+    public void updateLoggedUserCache(SecurityUser user) {
+        loggedUserCache.put(user.getToken(), user);
+    }
+
+    /**
      * get fort context by user.
      *
      * @param user the user
      * @return fort context
      */
-    public FortContext getFortContext(SecurityUser user) {
-        return null;
+    private FortContext getFortContext(SecurityUser user) {
+        // building fort context
+        FortContext context = FortContext.createEmptyContext();// create empty context
+
+        // set user
+        context.setSecurityUser(user);
+
+        // set authorities
+        Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
+        Set<SecurityRole> roles = user.getRoles();
+        for (SecurityRole role : roles) {
+            // get full role from cache, this role has eager relationships
+            SecurityRole fullRole = getRole(role.getId());
+            authorities.addAll(fullRole.getAuthorities());
+        }
+        context.setAuthorities(authorities);
+
+        // set tree navs
+        Set<SecurityNav> navs = getSecurityNavsByAuthorities(authorities);
+        context.setNavs(TreeSecurityNav.build(navs));
+
+        return context;
     }
 
     /**
-     * get fort context by user token
+     * get fort context by user token. get first from cache.if cache not found.
+     * then get from fort server. if fort server not found return null.
      *
-     * @param userToken the user token
+     * @param token the user token
      * @return fort context
      */
-    public FortContext getFortContext(String userToken) {
-        return null;
+    public FortContext getFortContext(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        // get first from cache.
+        SecurityUser user = loggedUserCache.get(token);
+        if (user == null) {
+            // get from fort server.
+            return null;
+        }
+
+        return getFortContext(user);
     }
 }

@@ -4,6 +4,7 @@ import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContext;
+import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import org.slf4j.Logger;
@@ -12,15 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.boyuanitsm.fort.sdk.config.Constants.*;
-import static com.boyuanitsm.fort.sdk.context.FortContextHolder.setContext;
 
 /**
  * Security Http Filter
@@ -55,8 +54,6 @@ public class SecurityHttpFilter implements Filter {
 
         log.debug("request uri: {}", requestUri);
 
-        handler.setFortContext(request);
-
         if (configuration.getLogin().getUrl().equals(requestUri)) {
             handler.signIn(request, response);
             return;
@@ -69,7 +66,6 @@ public class SecurityHttpFilter implements Filter {
                 handler.authentication(request, response, chain, resourceId);
                 return;
             }
-            // handler.setFortContext(request);
         }
 
         chain.doFilter(request, response);
@@ -98,33 +94,10 @@ public class SecurityHttpFilter implements Filter {
             String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
             try {
                 SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USERAGENT));
-
-                HttpSession session = request.getSession();
-                // create empty context
-                FortContext context = FortContext.createEmptyContext();
-
-                // set user
-                context.setSecurityUser(user);
-
-                // set authorities
-                Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
-                Set<SecurityRole> roles = user.getRoles();
-                for (SecurityRole role : roles) {
-                    // get full role from cache, this role has eager relationships
-                    SecurityRole fullRole = cache.getRole(role.getId());
-                    authorities.addAll(fullRole.getAuthorities());
-                }
-                context.setAuthorities(authorities);
-
-                // set tree navs
-                Set<SecurityNav> navs = cache.getSecurityNavsByAuthorities(authorities);
-                context.setNavs(TreeSecurityNav.build(navs));
-
-                // set session attribute
-                session.setAttribute(FORT_SESSION_NAME, context);
-
+                // update logged user cache.
+                cache.updateLoggedUserCache(user);
+                // set cookie
                 response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
-
                 // signIn success, redirect to success return
                 response.sendRedirect(configuration.getLogin().getSuccessReturn());
             } catch (FortAuthenticationException e) {
@@ -147,31 +120,35 @@ public class SecurityHttpFilter implements Filter {
             response.sendRedirect(configuration.getLogout().getSuccessReturn());
         }
 
-        /**
-         * set fort content. get session attribute , session name FortContextHolder.FORT_SESSION_NAME
-         *
-         * @param request http servlet request
-         */
-        private void setFortContext(HttpServletRequest request) {
-            Object attr = request.getSession().getAttribute(FORT_SESSION_NAME);
-            if (attr != null) {
-                setContext((FortContext) attr);
-            } else {
-                setContext(FortContext.createEmptyContext());
+        private String getCookieValue(Cookie[] cookies, String cookieName) {
+            for (Cookie cookie: cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    return cookie.getValue();
+                }
             }
+            return null;
         }
 
+        /**
+         * authentication access. if token is null. redirect to login view.
+         *
+         * @param request the servlet request
+         * @param response the servlet response
+         * @param chain the filter chain
+         * @param resourceId the resource id
+         * @throws IOException
+         * @throws ServletException
+         */
         private void authentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Long resourceId) throws IOException, ServletException {
-            // setFortContext(request);
-            Object attr = request.getSession().getAttribute(FORT_SESSION_NAME);
+            String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+            FortContext context = cache.getFortContext(token);
 
-            if (attr == null) {
+            if (context == null) {
                 // no logged, redirect to signIn view
                 response.sendRedirect(configuration.getLogin().getLoginView());
                 return;
             }
 
-            FortContext context = (FortContext) attr;
             // get resource entity
             SecurityResourceEntity resourceEntity = cache.getResourceEntity(resourceId);
             // get this resource relation authorities
@@ -187,13 +164,15 @@ public class SecurityHttpFilter implements Filter {
                         break;
                     }
                 }
-
                 if (isAllow) {
                     break;
                 }
             }
 
             if (isAllow) {// ok
+                // set context
+                FortContextHolder.setContext(context);
+                // do filter
                 chain.doFilter(request, response);
             } else {// un authorized
                 response.sendRedirect(configuration.getAuthentication().getUnauthorizedReturn());

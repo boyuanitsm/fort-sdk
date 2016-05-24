@@ -37,7 +37,7 @@ public class FortClient {
     private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
     private static final String API_SECURITY_GROUPS = "/api/security-groups";
     private static final String API_SECURITY_USERS = "/api/security-users";
-    private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/signIn";
+    private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
 
     private FortConfiguration configuration;
     private HttpClient httpClient;
