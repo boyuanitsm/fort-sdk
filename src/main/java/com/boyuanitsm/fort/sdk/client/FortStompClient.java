@@ -16,6 +16,7 @@ import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
@@ -46,18 +47,14 @@ public class FortStompClient {
     @Autowired
     public FortStompClient(FortClient client, FortConfiguration configuration) {
         this.configuration = configuration;
-
-        List<Transport> transports = new ArrayList<Transport>(2);
-        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-        transports.add(new RestTemplateXhrTransport());
+        WebSocketClient transport = new StandardWebSocketClient();
+        WebSocketStompClient stompClient = new WebSocketStompClient(transport);
+        stompClient.setMessageConverter(new StringMessageConverter());
+        // stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add("Cookie", client.getCookieString());
 
-        SockJsClient sockJsClient = new SockJsClient(transports);
-
-        WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
-        stompClient.setMessageConverter(new StringMessageConverter());
         ListenableFuture<StompSession> future = stompClient.connect(configuration.getApp().getWebsocketServerBase() + "/websocket/sa", headers, new MyWebSocketHandler());
 
         future.addCallback(new SuccessCallback<StompSession>() {
@@ -71,9 +68,9 @@ public class FortStompClient {
         });
     }
 
-    private class MyWebSocketHandler implements StompSessionHandler {
+    private class MyWebSocketHandler extends StompSessionHandlerAdapter {
 
-
+        @Override
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
             stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
@@ -91,21 +88,6 @@ public class FortStompClient {
                     }
                 }
             });
-        }
-
-        public void handleException(StompSession stompSession, StompCommand stompCommand, StompHeaders stompHeaders, byte[] bytes, Throwable throwable) {
-
-        }
-
-        public void handleTransportError(StompSession stompSession, Throwable throwable) {
-
-        }
-
-        public Type getPayloadType(StompHeaders stompHeaders) {
-            return null;
-        }
-
-        public void handleFrame(StompHeaders stompHeaders, Object o) {
         }
     }
 
