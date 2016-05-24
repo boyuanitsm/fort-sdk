@@ -1,16 +1,12 @@
 package com.boyuanitsm.fort.sdk.config;
 
-import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
-import com.boyuanitsm.fort.sdk.domain.SecurityRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * fort configuration. read file fort.yml.

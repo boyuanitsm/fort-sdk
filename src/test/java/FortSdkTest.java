@@ -1,4 +1,4 @@
-import com.boyuanitsm.fort.sdk.client.FortClient;
+import com.boyuanitsm.fort.sdk.client.FortCrudClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
@@ -26,7 +26,7 @@ import java.io.IOException;
 public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @Autowired
-    private FortClient fortClient;
+    private FortCrudClient crudClient;
 
     @RequestMapping("/api/profile")
     FortContext product() {
@@ -35,7 +35,7 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @RequestMapping("/api/signup")
     void signup(SecurityUser user, HttpServletResponse response) throws IOException, HttpException {
-        fortClient.signUp(user);
+        crudClient.signUp(user);
         response.sendRedirect("/login.html");
     }
 

@@ -3,7 +3,6 @@ package com.boyuanitsm.fort.sdk.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
@@ -11,8 +10,6 @@ import org.apache.http.HttpException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +24,6 @@ import java.util.List;
 @Component
 public class FortClient {
 
-    private final Logger log = LoggerFactory.getLogger(FortClient.class);
-
     private static final String API_AUTHENTICATION = "/api/authentication";
 
     private static final String API_SA_SECURITY_RESOURCE_ENTITIES = "/api/sa/security-resource-entities";
@@ -36,19 +31,14 @@ public class FortClient {
     private static final String API_SA_SECURITY_AUTHORITIES = "/api/sa/security-authorities";
     private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
     private static final String API_SECURITY_GROUPS = "/api/security-groups";
-    private static final String API_SECURITY_USERS = "/api/security-users";
     private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
 
-    private FortConfiguration configuration;
-    private HttpClient httpClient;
-    @Autowired
-    private FortResourceCache cache;
     private CookieStore cookieStore;
+    private FortHttpClient fortHttpClient;
 
     @Autowired
-    public FortClient(FortConfiguration configuration) {
-        this.configuration = configuration;
-        httpClient = new HttpClient(configuration.getApp().getServerBase());
+    public FortClient(FortConfiguration configuration, FortHttpClient fortHttpClient) {
+        this.fortHttpClient = fortHttpClient;
         try {
             this.cookieStore = loginFortSecurityServer(configuration.getApp().getAppKey(), configuration.getApp().getAppSecret());
         } catch (Exception e) {
@@ -65,7 +55,7 @@ public class FortClient {
      * @throws HttpException
      */
     private CookieStore loginFortSecurityServer(String appKey, String secret) throws IOException, HttpException {
-        return httpClient.loginFortSecurityServer(API_AUTHENTICATION,
+        return fortHttpClient.loginFortSecurityServer(API_AUTHENTICATION,
                 new BasicNameValuePair("j_username", appKey),
                 new BasicNameValuePair("j_password", secret),
                 new BasicNameValuePair("remember-me", "true"),
@@ -87,38 +77,11 @@ public class FortClient {
         obj.put("ipAddress", ipAddress);
         obj.put("userAgent", userAgent);
         try {
-            String content = httpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
+            String content = fortHttpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
             return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
         }catch (RuntimeException e) {
             throw new FortAuthenticationException("login or password fail", e);
         }
-    }
-
-    /**
-     * Register a new user, before register, set default role,group.
-     * role is fort.yml user: defaultRole. multi value comma split.
-     * group is fort.yml user: defaultGroup. multi value comma split.
-     *
-     * @param user security user, login、passwordHash required
-     * @throws IOException
-     * @throws HttpException
-     */
-    public void signUp(SecurityUser user) throws IOException, HttpException {
-        // set default role, group
-        user.setRoles(cache.getRolesByArrayNames(configuration.getUser().getDefaultRoles()));
-        user.setGroups(cache.getGroupsByArrayNames(configuration.getUser().getDefaultGroups()));
-        user.setActivated(true);
-
-        httpClient.postJson(API_SECURITY_USERS, user);
-    }
-
-    /**
-     * Update a already existing user. login updatable is false.
-     *
-     * @param user id not null
-     */
-    public void updateUser(SecurityUser user) throws IOException, HttpException {
-        httpClient.putJson(API_SECURITY_USERS, user);
     }
 
     /**
@@ -129,7 +92,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityResourceEntity> getAllResourceEntities() throws IOException, HttpException {
-        String content = httpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
+        String content = fortHttpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
         return JSONArray.parseArray(content, SecurityResourceEntity.class);
     }
 
@@ -141,7 +104,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityNav> getAllSecurityNavs() throws IOException, HttpException {
-        String content = httpClient.get(API_SECURITY_NAVS);
+        String content = fortHttpClient.get(API_SECURITY_NAVS);
         return JSONArray.parseArray(content, SecurityNav.class);
     }
 
@@ -153,7 +116,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityAuthority> getAllAuthorities() throws IOException, HttpException {
-        String content = httpClient.get(API_SA_SECURITY_AUTHORITIES);
+        String content = fortHttpClient.get(API_SA_SECURITY_AUTHORITIES);
         return JSONArray.parseArray(content, SecurityAuthority.class);
     }
 
@@ -165,7 +128,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityRole> getAllRoles() throws IOException, HttpException {
-        String content = httpClient.get(API_SA_SECURITY_ROLES);
+        String content = fortHttpClient.get(API_SA_SECURITY_ROLES);
         return JSONArray.parseArray(content, SecurityRole.class);
     }
 
@@ -177,7 +140,7 @@ public class FortClient {
      * @throws HttpException
      */
     public List<SecurityGroup> getAllGroups() throws IOException, HttpException {
-        String content = httpClient.get(API_SECURITY_GROUPS);
+        String content = fortHttpClient.get(API_SECURITY_GROUPS);
         return JSONArray.parseArray(content, SecurityGroup.class);
     }
 

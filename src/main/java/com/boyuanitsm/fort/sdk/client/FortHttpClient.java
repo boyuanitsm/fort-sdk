@@ -1,6 +1,7 @@
 package com.boyuanitsm.fort.sdk.client;
 
 import com.alibaba.fastjson.JSON;
+import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -18,6 +19,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,12 +32,14 @@ import java.util.List;
  *
  * @author zhanghua on 5/16/16.
  */
-public class HttpClient {
+@Component
+public class FortHttpClient {
 
-    private final Logger log = LoggerFactory.getLogger(HttpClient.class);
+    private final Logger log = LoggerFactory.getLogger(FortHttpClient.class);
 
-    HttpClient(String baseUrl) {
-        this.baseUrl = baseUrl;
+    @Autowired
+    FortHttpClient(FortConfiguration configuration) {
+        this.baseUrl = configuration.getApp().getServerBase();
         context.setCookieStore(cookieStore);
     }
 
