@@ -2,6 +2,7 @@ package com.boyuanitsm.fort.sdk.client;
 
 import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -57,7 +58,7 @@ public class FortHttpClient {
     /**
      * send post request Content-Type: application/x-www-form-urlencoded
      *
-     * @param url post url
+     * @param url   post url
      * @param pairs form params
      * @return response content
      * @throws IOException
@@ -77,7 +78,7 @@ public class FortHttpClient {
     /**
      * send post request Content-Type: application/json
      *
-     * @param url post url
+     * @param url  post url
      * @param json json
      * @return response content
      * @throws IOException
@@ -112,7 +113,7 @@ public class FortHttpClient {
     /**
      * send put request Content-Type: application/json
      *
-     * @param url put url
+     * @param url  put url
      * @param json json
      * @return response content
      * @throws IOException
@@ -145,7 +146,7 @@ public class FortHttpClient {
     /**
      * send get request
      *
-     * @param url request url
+     * @param url   request url
      * @param pairs url params
      * @return response content
      * @throws IOException
@@ -162,7 +163,7 @@ public class FortHttpClient {
         return send(get);
     }
 
-    String delete(String url) throws IOException, HttpException {
+    String delete(String url) throws IOException, HttpException, FortNoValidException {
         StringBuffer fullDeleteUrl = new StringBuffer().append(baseUrl).append(url);
         HttpDelete delete = new HttpDelete(fullDeleteUrl.toString());
         return send(delete);
@@ -183,7 +184,7 @@ public class FortHttpClient {
         // send request
         CloseableHttpResponse response = httpClient.execute(request, context);
         // validate http status code
-        isSuccess(response.getStatusLine().getStatusCode(), null);
+        isSuccess(response, null);
         // get response content
         String content = EntityUtils.toString(response.getEntity());
         // close response
@@ -211,16 +212,26 @@ public class FortHttpClient {
     /**
      * is request success
      *
-     * @param statusCode http status code
-     * @param errMsg error message
-     * @throws RuntimeException if status code != 200 || != 201, throw exception
+     * @param response http response
+     * @param errMsg   error message
+     * @throws FortNoValidException when status code 400
+     * @throws RuntimeException
      */
-    private void isSuccess(int statusCode, String errMsg) throws RuntimeException {
+    private void isSuccess(CloseableHttpResponse response, String errMsg) throws RuntimeException, FortNoValidException {
         if (errMsg == null)
             errMsg = "";
 
-        if (statusCode != 200 && statusCode != 201) {
-            throw new RuntimeException(String.format("http code is not ok! is %s. %s", statusCode, errMsg));
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        switch (statusCode) {
+            case 200:
+            case 201:
+                break;
+            case 400:
+                String fortAppError = response.getFirstHeader("X-fortApp-error").getValue();
+                throw new FortNoValidException(fortAppError);
+            default:
+                throw new RuntimeException(String.format("http code is no ok! is %s. %s", statusCode, errMsg));
         }
     }
 }
