@@ -1,5 +1,7 @@
 ## Fort SDK
 
+![Build Status](http://180.167.77.58:30000/fort/fort-sdk/badges/master/build.svg)
+
 ### 开始集成Fort SDK
 
 *   [Requirements](docs/requirements.md)
