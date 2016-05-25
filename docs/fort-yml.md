@@ -2,15 +2,15 @@
 
 fort sdk 的配置文件，以maven项目为例，将fort.yml放置在`src/main/resource/`目录内
 
-fort.yml sample:
+### Sample Config
 
 ```
 # ===================================================================
-# Fort configuration
+# Fort SDK configuration
 # ===================================================================
 
 # ===================================================================
-# Standard Fort properties.
+# Standard Fort SDK properties.
 # Full reference is available at:
 # http://180.167.77.58:30000/fort/fort-sdk/blob/master/docs/fort-yml.md
 # ===================================================================
