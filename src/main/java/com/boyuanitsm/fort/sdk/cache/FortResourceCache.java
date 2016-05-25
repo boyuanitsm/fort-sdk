@@ -264,12 +264,24 @@ public class FortResourceCache {
             updateGroup(onUpdateSecurityResource);
         } else if (SECURITY_ROLE.equals(resourceClass)) {// update role
             updateRole(onUpdateSecurityResource);
+        } else if (SECURITY_USER.equals(resourceClass)) {// update user
+            updateUser(onUpdateSecurityResource);
         } else {
             // warning: we don't have this resource class
             log.warn("We don't have this resource class: {}", resourceClass);
         }
 
         log.info("Updated security resource! {}", onUpdateSecurityResource);
+    }
+
+    /**
+     * Update user.
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateUser(OnUpdateSecurityResource onUpdateSecurityResource) {
+        SecurityUser user = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityUser.class);
+        updateLoggedUserCache(user);
     }
 
     /**
