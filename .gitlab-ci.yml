@@ -1,3 +1,6 @@
+before_script:
+    - java -version && mvn -v
+
 job1:
     script:
         - mvn clean package
