@@ -10,5 +10,4 @@ job1:
     except:
         - develop
     tags:
-        - Java
-        - SDK
+        - java
