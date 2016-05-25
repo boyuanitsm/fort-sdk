@@ -32,6 +32,7 @@ public class FortClient {
     private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
     private static final String API_SECURITY_GROUPS = "/api/security-groups";
     private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
+    private static final String API_SECURITY_USERS_DTO = "/api/security-user-dto";
 
     private CookieStore cookieStore;
     private FortHttpClient fortHttpClient;
@@ -142,6 +143,22 @@ public class FortClient {
     public List<SecurityGroup> getAllGroups() throws IOException, HttpException {
         String content = fortHttpClient.get(API_SECURITY_GROUPS);
         return JSONArray.parseArray(content, SecurityGroup.class);
+    }
+
+    /**
+     * Get user by user token.
+     *
+     * @param token the token of the user.
+     * @return user
+     * @throws IOException
+     * @throws HttpException
+     */
+    public SecurityUser getByUserToken(String token) throws IOException, HttpException {
+        String content = fortHttpClient.get(API_SECURITY_USERS_DTO + "/" + token);
+        if (content == null) {
+            return null;
+        }
+        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
     }
 
     String getCookieString() {

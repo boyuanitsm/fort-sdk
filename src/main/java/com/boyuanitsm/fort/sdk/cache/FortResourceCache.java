@@ -434,7 +434,18 @@ public class FortResourceCache {
         SecurityUser user = loggedUserCache.get(token);
         if (user == null) {
             // get from fort server.
-            return null;
+            try {
+                user = fortClient.getByUserToken(token);
+                if (user == null) {
+                    return null;
+                } else {
+                    // update cache
+                    updateLoggedUserCache(user);
+                }
+            } catch (Exception e) {
+                log.error("Get user by token error! token: {}", token);
+                return null;
+            }
         }
 
         return getFortContext(user);
