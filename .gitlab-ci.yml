@@ -1,0 +1,11 @@
+job1:
+    script:
+        - mvn clean package
+    stage: test
+    only:
+        - master
+    except:
+        - develop
+    tags:
+        - Java
+        - SDK
