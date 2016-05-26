@@ -17,7 +17,7 @@ com.boyuanitsm.fort.sdk.util
 
  Modifier and Type                         | Method and Description
  ------------------------------------------| -----------------------------
- static java.util.Set<SecurityAuthority>   | [getCurrentUserAuthorities()](#getCurrentUserAuthorities)
+ static java.util.Set<SecurityAuthority>   | getCurrentUserAuthorities()
  static java.util.Set<SecurityGroup>	   | getCurrentUserGroups()        
  static java.lang.String                   | getCurrentUserLogin()     
  static java.util.Set<SecurityRole>        | getCurrentUserRoles()
