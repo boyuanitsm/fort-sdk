@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -21,6 +23,8 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.lang.reflect.Type;
+import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * fort stomp client. subscribe on update security resource.
@@ -41,10 +45,40 @@ public class FortStompClient {
     @Autowired
     public FortStompClient(FortClient client, FortConfiguration configuration) {
         this.configuration = configuration;
-        WebSocketClient transport = new StandardWebSocketClient();
+        final WebSocketClient transport = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(transport);
         stompClient.setMessageConverter(new StringMessageConverter());
-        // stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
+        stompClient.setTaskScheduler(new TaskScheduler() {
+            @Override
+            public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+                return null;
+            }
+
+            @Override
+            public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
+                return null;
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
+                return null;
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
+                return null;
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
+                return null;
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
+                return null;
+            }
+        }); // for heartbeats, receipts
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add("Cookie", client.getCookieString());
@@ -57,15 +91,17 @@ public class FortStompClient {
             }
         }, new FailureCallback() {
             public void onFailure(Throwable throwable) {
-                log.info("Login fort web socket stomp server error!");
+                log.info("Login fort web socket stomp server error!", throwable);
             }
         });
     }
 
-    private class MyWebSocketHandler extends StompSessionHandlerAdapter {
+    private class MyWebSocketHandler implements StompSessionHandler {
 
         @Override
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
+            stompSession.setAutoReceipt(true);
+
             stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders stompHeaders) {
@@ -82,6 +118,30 @@ public class FortStompClient {
                     }
                 }
             });
+        }
+
+        @Override
+        public void handleException(StompSession stompSession, StompCommand stompCommand, StompHeaders stompHeaders, byte[] bytes, Throwable throwable) {
+            log.error("web socket handleException", throwable);
+        }
+
+        @Override
+        public void handleTransportError(StompSession stompSession, Throwable throwable) {
+            if (throwable instanceof ConnectionLostException) {
+                log.warn("Fort Web Socket Connection lost!!! Reconnecting...");
+            }
+            log.error("handleTransportError", throwable);
+        }
+
+        @Override
+        public Type getPayloadType(StompHeaders stompHeaders) {
+            return String.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders stompHeaders, Object o) {
+            log.info(stompHeaders.toString());
+            log.info(o.toString());
         }
     }
 
