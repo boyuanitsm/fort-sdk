@@ -37,7 +37,7 @@ public class FortCrudClient {
      * role is fort.yml user: defaultRole. multi value comma split.
      * group is fort.yml user: defaultGroup. multi value comma split.
      *
-     * @param user security user, login、passwordHash required
+     * @param user security user, login, passwordHash required
      * @throws FortCrudException
      */
     public void signUp(SecurityUser user) throws FortCrudException {
