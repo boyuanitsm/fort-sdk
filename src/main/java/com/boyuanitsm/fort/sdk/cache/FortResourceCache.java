@@ -7,6 +7,7 @@ import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption;
 import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
+import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import org.apache.http.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class FortResourceCache {
     private static Map<String, SecurityUser> loggedUserCache;
 
     @Autowired
-    public FortResourceCache(FortClient fortClient) throws IOException, HttpException {
+    public FortResourceCache(FortClient fortClient) throws FortCrudException {
         this.fortClient = fortClient;// autowired fort client
         load();// load resource
     }
@@ -83,10 +84,9 @@ public class FortResourceCache {
     /**
      * load resource from fort server.
      *
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    private void load() throws IOException, HttpException{
+    private void load() throws FortCrudException {
         log.info("Starting fort");
         long t1 = System.currentTimeMillis();
 
@@ -94,28 +94,28 @@ public class FortResourceCache {
 
         // load resource entities
         List<SecurityResourceEntity> resourceEntities = fortClient.getAllResourceEntities();
-        for (SecurityResourceEntity resourceEntity: resourceEntities) {
+        for (SecurityResourceEntity resourceEntity : resourceEntities) {
             resourceEntityCache.put(resourceEntity.getId(), resourceEntity);
             resourceUrlIdMap.put(resourceEntity.getUrl(), resourceEntity.getId());
         }
         // load navs
         List<SecurityNav> navs = fortClient.getAllSecurityNavs();
-        for (SecurityNav nav: navs) {
+        for (SecurityNav nav : navs) {
             navCache.put(nav.getResource().getId(), nav);
         }
         // load authorities
         List<SecurityAuthority> authorities = fortClient.getAllAuthorities();
-        for (SecurityAuthority authority: authorities) {
+        for (SecurityAuthority authority : authorities) {
             authorityCache.put(authority.getId(), authority);
         }
         // load roles
         List<SecurityRole> roles = fortClient.getAllRoles();
-        for (SecurityRole role: roles) {
+        for (SecurityRole role : roles) {
             roleCache.put(role.getId(), role);
         }
         // load group
         List<SecurityGroup> groups = fortClient.getAllGroups();
-        for (SecurityGroup group: groups) {
+        for (SecurityGroup group : groups) {
             groupCache.put(group.getId(), group);
         }
 
@@ -196,10 +196,10 @@ public class FortResourceCache {
 
         Set<SecurityNav> navs = new HashSet<SecurityNav>();
 
-        for (SecurityAuthority authority: authorities) {
+        for (SecurityAuthority authority : authorities) {
             // get has relationship authority
             authority = authorityCache.get(authority.getId());
-            for (SecurityResourceEntity resourceEntity: authority.getResources()) {
+            for (SecurityResourceEntity resourceEntity : authority.getResources()) {
                 SecurityNav nav = navCache.get(resourceEntity.getId());
                 if (nav != null) {
                     navs.add(nav);
@@ -215,7 +215,7 @@ public class FortResourceCache {
 
         Set<Long> keys = roleCache.keySet();
 
-        for (Long key: keys) {
+        for (Long key : keys) {
             SecurityRole role = roleCache.get(key);
 
             for (int i = 0; i < roleNames.length; i++) {
@@ -233,7 +233,7 @@ public class FortResourceCache {
 
         Set<Long> keys = groupCache.keySet();
 
-        for (Long key: keys) {
+        for (Long key : keys) {
             SecurityGroup group = groupCache.get(key);
 
             for (int i = 0; i < groupNames.length; i++) {
@@ -378,7 +378,7 @@ public class FortResourceCache {
         // remove from resource url id map
         // find key
         String removeKey = null;
-        for (String url: resourceUrlIdMap.keySet()) {
+        for (String url : resourceUrlIdMap.keySet()) {
             Long id = resourceUrlIdMap.get(url);
             if (id.equals(resourceId)) {
                 removeKey = url;
@@ -454,7 +454,7 @@ public class FortResourceCache {
                     // update cache
                     updateLoggedUserCache(user);
                 }
-            } catch (Exception e) {
+            } catch (Exception | FortCrudException e) {
                 log.error("Get user by token error! token: {}", token);
                 return null;
             }
