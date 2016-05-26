@@ -7,14 +7,12 @@ import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
-import org.apache.http.HttpException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -52,15 +50,11 @@ public class FortClient {
      * @throws FortCrudException
      */
     private CookieStore loginFortSecurityServer(String appKey, String secret) throws FortCrudException {
-        try {
-            return fortHttpClient.loginFortSecurityServer(API_AUTHENTICATION,
-                    new BasicNameValuePair("j_username", appKey),
-                    new BasicNameValuePair("j_password", secret),
-                    new BasicNameValuePair("remember-me", "true"),
-                    new BasicNameValuePair("submit", "Login"));
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        return fortHttpClient.loginFortSecurityServer(API_AUTHENTICATION,
+                new BasicNameValuePair("j_username", appKey),
+                new BasicNameValuePair("j_password", secret),
+                new BasicNameValuePair("remember-me", "true"),
+                new BasicNameValuePair("submit", "Login"));
     }
 
     /**
@@ -79,7 +73,7 @@ public class FortClient {
         try {
             String content = fortHttpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
             return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
-        } catch (HttpException | IOException | FortCrudException e) {
+        } catch (FortCrudException e) {
             throw new FortAuthenticationException("security user sign in failure!", e);
         }
     }
@@ -91,12 +85,8 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityResourceEntity> getAllResourceEntities() throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
-            return JSONArray.parseArray(content, SecurityResourceEntity.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        String content = fortHttpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
+        return JSONArray.parseArray(content, SecurityResourceEntity.class);
     }
 
     /**
@@ -106,12 +96,8 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityNav> getAllSecurityNavs() throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SECURITY_NAVS);
-            return JSONArray.parseArray(content, SecurityNav.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        String content = fortHttpClient.get(API_SECURITY_NAVS);
+        return JSONArray.parseArray(content, SecurityNav.class);
     }
 
     /**
@@ -121,12 +107,8 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityAuthority> getAllAuthorities() throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SA_SECURITY_AUTHORITIES);
-            return JSONArray.parseArray(content, SecurityAuthority.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        String content = fortHttpClient.get(API_SA_SECURITY_AUTHORITIES);
+        return JSONArray.parseArray(content, SecurityAuthority.class);
     }
 
     /**
@@ -136,12 +118,8 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityRole> getAllRoles() throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SA_SECURITY_ROLES);
-            return JSONArray.parseArray(content, SecurityRole.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        String content = fortHttpClient.get(API_SA_SECURITY_ROLES);
+        return JSONArray.parseArray(content, SecurityRole.class);
     }
 
     /**
@@ -151,12 +129,8 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityGroup> getAllGroups() throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SECURITY_GROUPS);
-            return JSONArray.parseArray(content, SecurityGroup.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
-        }
+        String content = fortHttpClient.get(API_SECURITY_GROUPS);
+        return JSONArray.parseArray(content, SecurityGroup.class);
     }
 
     /**
@@ -167,15 +141,11 @@ public class FortClient {
      * @throws FortCrudException
      */
     public SecurityUser getByUserToken(String token) throws FortCrudException {
-        try {
-            String content = fortHttpClient.get(API_SECURITY_USERS_DTO + "/" + token);
-            if (content == null) {
-                return null;
-            }
-            return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
-        } catch (IOException | HttpException e) {
-            throw new FortCrudException(e);
+        String content = fortHttpClient.get(API_SECURITY_USERS_DTO + "/" + token);
+        if (content == null) {
+            return null;
         }
+        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
     }
 
     String getCookieString() {
