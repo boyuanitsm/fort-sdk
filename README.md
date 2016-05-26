@@ -15,3 +15,7 @@
 
 *   [Fort Crud Client](docs/fort-crud-client.md)
 *   [Security Utils](docs/security-utils.md)
+
+## 实体关系图
+
+![domain-jdl](docs/images/jhipster-jdl.png)
