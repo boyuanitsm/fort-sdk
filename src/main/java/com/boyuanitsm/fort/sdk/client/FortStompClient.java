@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.Trigger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.SuccessCallback;
@@ -22,8 +20,6 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  * fort stomp client. subscribe on update security resource.
@@ -50,20 +46,27 @@ public class FortStompClient {
         connect();
     }
 
+    /**
+     * Connection fort cache update service. if connection failure, reconnection.
+     */
     private void connect() {
+        // set connecting
         connecting = true;
 
+        // create web socket client
         final WebSocketClient transport = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(transport);
         stompClient.setMessageConverter(new StringMessageConverter());
-
+        // add headers
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add("Cookie", client.getCookieString());
 
+        // do connection
         stompClient.connect(String.format("%s/websocket/sa", configuration.getApp().getWebsocketServerBase()), headers, new MyWebSocketHandler())
                 .addCallback(new SuccessCallback<StompSession>() {
                     public void onSuccess(StompSession stompSession) {
                         log.info("Connection fort cache update service success!");
+                        // set connecting false
                         connecting = false;
                     }
                 }, new FailureCallback() {
@@ -85,6 +88,7 @@ public class FortStompClient {
 
         @Override
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
+            // subscribe message on update security resource
             stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders stompHeaders) {
@@ -93,6 +97,7 @@ public class FortStompClient {
                 @Override
                 public void handleFrame(StompHeaders stompHeaders, Object o) {
                     try {
+                        // update cache
                         OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
                         cache.updateResource(onUpdateSecurityResource);
                     } catch (Exception e) {
@@ -109,6 +114,7 @@ public class FortStompClient {
 
         @Override
         public void handleTransportError(StompSession stompSession, Throwable throwable) {
+            // connection lost !!!
             if (throwable instanceof ConnectionLostException && !connecting) {
                 log.warn("The fort cache update service connection lost!!! Reconnection...");
                 connect();
