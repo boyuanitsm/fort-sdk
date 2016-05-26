@@ -56,37 +56,6 @@ public class FortStompClient {
         final WebSocketClient transport = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(transport);
         stompClient.setMessageConverter(new StringMessageConverter());
-        stompClient.setTaskScheduler(new TaskScheduler() {
-            @Override
-            public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
-                return null;
-            }
-
-            @Override
-            public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-                return null;
-            }
-
-            @Override
-            public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-                return null;
-            }
-
-            @Override
-            public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
-                return null;
-            }
-
-            @Override
-            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-                return null;
-            }
-
-            @Override
-            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
-                return null;
-            }
-        }); // for heartbeats, receipts
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add("Cookie", client.getCookieString());
@@ -116,7 +85,6 @@ public class FortStompClient {
 
         @Override
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
-            stompSession.setAutoReceipt(true);
             stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders stompHeaders) {
