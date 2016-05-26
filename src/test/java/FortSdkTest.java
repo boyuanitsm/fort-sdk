@@ -2,7 +2,7 @@ import com.boyuanitsm.fort.sdk.client.FortCrudClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
-import org.apache.http.HttpException;
+import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,7 +34,7 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
     }
 
     @RequestMapping("/api/signup")
-    void signup(SecurityUser user, HttpServletResponse response) throws IOException, HttpException {
+    void signup(SecurityUser user, HttpServletResponse response) throws FortCrudException, IOException {
         crudClient.signUp(user);
         response.sendRedirect("/login.html");
     }

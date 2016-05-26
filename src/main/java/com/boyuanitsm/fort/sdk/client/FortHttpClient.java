@@ -2,6 +2,7 @@ package com.boyuanitsm.fort.sdk.client;
 
 import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +52,7 @@ public class FortHttpClient {
     private HttpClientContext context = HttpClientContext.create();
     private CookieStore cookieStore = new BasicCookieStore();
 
-    CookieStore loginFortSecurityServer(String url, BasicNameValuePair... pairs) throws IOException, HttpException {
+    CookieStore loginFortSecurityServer(String url, BasicNameValuePair... pairs) throws FortCrudException {
         postForm(url, pairs);
         return cookieStore;
     }
@@ -61,17 +63,20 @@ public class FortHttpClient {
      * @param url   post url
      * @param pairs form params
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String postForm(String url, BasicNameValuePair... pairs) throws IOException, HttpException {
+    String postForm(String url, BasicNameValuePair... pairs) throws FortCrudException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set form entity
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
         formParams.addAll(Arrays.asList(pairs));
         formParams.add(new BasicNameValuePair("_csrf", getCookieValue("CSRF-TOKEN")));
-        post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+        try {
+            post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new FortCrudException(e);
+        }
         return send(post);
     }
 
@@ -81,14 +86,17 @@ public class FortHttpClient {
      * @param url  post url
      * @param json json
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String postJson(String url, JSON json) throws IOException, HttpException {
+    String postJson(String url, JSON json) throws FortCrudException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set json string entity
-        post.setEntity(new StringEntity(json.toJSONString()));
+        try {
+            post.setEntity(new StringEntity(json.toJSONString()));
+        } catch (UnsupportedEncodingException e) {
+            throw new FortCrudException(e);
+        }
         post.setHeader("Accept", "application/json");
         post.setHeader("Content-type", "application/json;charset=UTF-8");
         post.setHeader("X-CSRF-TOKEN", getCookieValue("CSRF-TOKEN"));
@@ -102,10 +110,9 @@ public class FortHttpClient {
      * @param url post url
      * @param obj obj
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String postJson(String url, Object obj) throws IOException, HttpException {
+    String postJson(String url, Object obj) throws FortCrudException {
         JSON json = (JSON) JSON.toJSON(obj);
         return postJson(url, json);
     }
@@ -116,14 +123,17 @@ public class FortHttpClient {
      * @param url  put url
      * @param json json
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String putJson(String url, JSON json) throws IOException, HttpException {
+    String putJson(String url, JSON json) throws FortCrudException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPut put = new HttpPut(fullPostUrl.toString());
         // set json string entity
-        put.setEntity(new StringEntity(json.toJSONString()));
+        try {
+            put.setEntity(new StringEntity(json.toJSONString()));
+        } catch (UnsupportedEncodingException e) {
+            throw new FortCrudException(e);
+        }
         put.setHeader("Accept", "application/json");
         put.setHeader("Content-type", "application/json;charset=UTF-8");
         return send(put);
@@ -135,10 +145,9 @@ public class FortHttpClient {
      * @param url put url
      * @param obj obj
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String putJson(String url, Object obj) throws IOException, HttpException {
+    String putJson(String url, Object obj) throws FortCrudException {
         JSON json = (JSON) JSON.toJSON(obj);
         return putJson(url, json);
     }
@@ -149,10 +158,9 @@ public class FortHttpClient {
      * @param url   request url
      * @param pairs url params
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    String get(String url, BasicNameValuePair... pairs) throws IOException, HttpException {
+    String get(String url, BasicNameValuePair... pairs) throws FortCrudException {
         String urlParams = URLEncodedUtils.format(Arrays.asList(pairs), "UTF-8");
         if (!url.endsWith("?")) {
             url += "?";
@@ -163,7 +171,7 @@ public class FortHttpClient {
         return send(get);
     }
 
-    String delete(String url) throws IOException, HttpException, FortNoValidException {
+    String delete(String url) throws FortCrudException {
         StringBuffer fullDeleteUrl = new StringBuffer().append(baseUrl).append(url);
         HttpDelete delete = new HttpDelete(fullDeleteUrl.toString());
         return send(delete);
@@ -174,22 +182,25 @@ public class FortHttpClient {
      *
      * @param request http request base
      * @return response content
-     * @throws IOException
-     * @throws HttpException
+     * @throws FortCrudException
      */
-    private String send(HttpRequestBase request) throws IOException, HttpException {
+    private String send(HttpRequestBase request) throws FortCrudException {
         // Make sure cookie headers are written
         RequestAddCookies addCookies = new RequestAddCookies();
-        addCookies.process(request, context);
-        // send request
-        CloseableHttpResponse response = httpClient.execute(request, context);
-        // validate http status code
-        isSuccess(response, null);
-        // get response content
-        String content = EntityUtils.toString(response.getEntity());
-        // close response
-        response.close();
-        return content;
+        try {
+            addCookies.process(request, context);
+            // send request
+            CloseableHttpResponse response = httpClient.execute(request, context);
+            // validate http status code
+            isSuccess(response, null);
+            // get response content
+            String content = EntityUtils.toString(response.getEntity());
+            // close response
+            response.close();
+            return content;
+        } catch (HttpException | IOException e) {
+            throw new FortCrudException(e);
+        }
     }
 
     /**
@@ -214,10 +225,9 @@ public class FortHttpClient {
      *
      * @param response http response
      * @param errMsg   error message
-     * @throws FortNoValidException when status code 400
-     * @throws RuntimeException
+     * @throws FortCrudException
      */
-    private void isSuccess(CloseableHttpResponse response, String errMsg) throws RuntimeException, FortNoValidException {
+    private void isSuccess(CloseableHttpResponse response, String errMsg) throws FortCrudException {
         if (errMsg == null)
             errMsg = "";
 
@@ -231,7 +241,7 @@ public class FortHttpClient {
                 String fortAppError = response.getFirstHeader("X-fortApp-error").getValue();
                 throw new FortNoValidException(fortAppError);
             default:
-                throw new RuntimeException(String.format("http code is no ok! is %s. %s", statusCode, errMsg));
+                throw new FortCrudException(String.format("http code is no ok! is %s. %s", statusCode, errMsg));
         }
     }
 }

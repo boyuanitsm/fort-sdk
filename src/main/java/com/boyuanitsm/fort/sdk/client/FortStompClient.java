@@ -13,7 +13,6 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.FailureCallback;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.WebSocketClient;
@@ -32,8 +31,10 @@ public class FortStompClient {
 
     private final Logger log = LoggerFactory.getLogger(FortClient.class);
 
-    @Autowired
     private FortConfiguration configuration;
+    private FortClient client;
+    // is connecting web socket
+    private boolean connecting = false;
 
     @Autowired
     private FortResourceCache cache;
@@ -41,40 +42,62 @@ public class FortStompClient {
     @Autowired
     public FortStompClient(FortClient client, FortConfiguration configuration) {
         this.configuration = configuration;
-        WebSocketClient transport = new StandardWebSocketClient();
+        this.client = client;
+        connect();
+    }
+
+    /**
+     * Connection fort cache update service. if connection failure, reconnection.
+     */
+    private void connect() {
+        // set connecting
+        connecting = true;
+
+        // create web socket client
+        final WebSocketClient transport = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(transport);
         stompClient.setMessageConverter(new StringMessageConverter());
-        // stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
-
+        // add headers
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.add("Cookie", client.getCookieString());
 
-        ListenableFuture<StompSession> future = stompClient.connect(configuration.getApp().getWebsocketServerBase() + "/websocket/sa", headers, new MyWebSocketHandler());
-
-        future.addCallback(new SuccessCallback<StompSession>() {
-            public void onSuccess(StompSession stompSession) {
-                log.info("Login fort web socket stomp server success!");
-            }
-        }, new FailureCallback() {
-            public void onFailure(Throwable throwable) {
-                log.info("Login fort web socket stomp server error!");
-            }
-        });
+        // do connection
+        stompClient.connect(String.format("%s/websocket/sa", configuration.getApp().getWebsocketServerBase()), headers, new MyWebSocketHandler())
+                .addCallback(new SuccessCallback<StompSession>() {
+                    public void onSuccess(StompSession stompSession) {
+                        log.info("Connection fort cache update service success!");
+                        // set connecting false
+                        connecting = false;
+                    }
+                }, new FailureCallback() {
+                    public void onFailure(Throwable throwable) {
+                        log.warn("Connection fort cache update service failure! {}", throwable.getMessage());
+                        try {
+                            // sleep 5s
+                            Thread.sleep(5000);
+                            // reconnect
+                            connect();
+                        } catch (InterruptedException e) {
+                            log.error("sleep error", e);
+                        }
+                    }
+                });
     }
 
-    private class MyWebSocketHandler extends StompSessionHandlerAdapter {
+    private class MyWebSocketHandler implements StompSessionHandler {
 
         @Override
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
+            // subscribe message on update security resource
             stompSession.subscribe(String.format("/topic/%s/onUpdateSecurityResource", configuration.getApp().getAppKey()), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders stompHeaders) {
                     return String.class;
                 }
-
                 @Override
                 public void handleFrame(StompHeaders stompHeaders, Object o) {
                     try {
+                        // update cache
                         OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
                         cache.updateResource(onUpdateSecurityResource);
                     } catch (Exception e) {
@@ -83,6 +106,32 @@ public class FortStompClient {
                 }
             });
         }
-    }
 
+        @Override
+        public void handleException(StompSession stompSession, StompCommand stompCommand, StompHeaders stompHeaders, byte[] bytes, Throwable throwable) {
+            log.error("The fort cache update service handle exception!", throwable);
+        }
+
+        @Override
+        public void handleTransportError(StompSession stompSession, Throwable throwable) {
+            // connection lost !!!
+            if (throwable instanceof ConnectionLostException && !connecting) {
+                log.warn("The fort cache update service connection lost!!! Reconnection...");
+                connect();
+            }
+
+            if (!connecting) {
+                log.error("The fort cache update service handle transport error! {}", throwable.getMessage());
+            }
+        }
+
+        @Override
+        public Type getPayloadType(StompHeaders stompHeaders) {
+            return null;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders stompHeaders, Object o) {
+        }
+    }
 }
