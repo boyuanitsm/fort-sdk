@@ -18,6 +18,4 @@
 
 ## 实体关系图
 
-<div style="background-color: rgb(40, 44, 52);">
-    ![domain-jdl](docs/images/jhipster-jdl.png)
-</div>
+![domain-jdl](docs/images/jhipster-jdl.png)
