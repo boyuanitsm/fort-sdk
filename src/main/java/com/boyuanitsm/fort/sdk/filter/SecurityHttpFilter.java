@@ -94,7 +94,7 @@ public class SecurityHttpFilter implements Filter {
             String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
             String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
             try {
-                SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USERAGENT));
+                SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USER_AGENT));
                 // update logged user cache.
                 cache.updateLoggedUserCache(user);
                 // set cookie
