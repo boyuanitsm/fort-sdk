@@ -9,5 +9,6 @@ public class API {
 
     public static final String SECURITY_USERS = "/api/security-users";
     public static final String SECURITY_GROUPS = "/api/security-groups";
+    public static final String SECURITY_USER_LOGOUT = "/api/security-user-logout";
 
 }

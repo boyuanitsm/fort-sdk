@@ -3,6 +3,7 @@ package com.boyuanitsm.fort.sdk.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
@@ -156,5 +157,11 @@ public class FortClient {
         }
 
         return cookieString;
+    }
+
+    public void logout(String token) throws FortCrudException {
+        JSONObject json = new JSONObject();
+        json.put("tokenValue", token);
+        fortHttpClient.putJson(API.SECURITY_USER_LOGOUT, json);
     }
 }

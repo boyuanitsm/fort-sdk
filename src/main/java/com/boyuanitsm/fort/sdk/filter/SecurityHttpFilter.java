@@ -7,6 +7,7 @@ import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
+import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class SecurityHttpFilter implements Filter {
             handler.signIn(request, response);
             return;
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
-            handler.logout(response);
+            handler.logout(request, response);
             return;
         } else {
             Long resourceId = cache.getResourceId(requestUri);
@@ -109,14 +110,22 @@ public class SecurityHttpFilter implements Filter {
         }
 
         /**
-         * logout handler. remove cookie JSESSIONID FORT_USER_TOKEN_COOKIE_NAME
+         * logout handler. remove cookie FORT_USER_TOKEN_COOKIE_NAME
          *
+         * @param request  http servlet request
          * @param response http servlet response
          * @throws IOException
          */
-        private void logout(HttpServletResponse response) throws IOException {
-            response.addHeader("Set-Cookie", "JSESSIONID=; Path=/; HttpOnly");
+        private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            // clear cookie
             response.addHeader("Set-Cookie", String.format("%s=; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME));
+            // token overdue
+            String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+            try {
+                client.logout(token);
+            } catch (FortCrudException e) {
+                log.warn("token overdue error! ", e);
+            }
             response.sendRedirect(configuration.getLogout().getSuccessReturn());
         }
 

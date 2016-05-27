@@ -280,8 +280,14 @@ public class FortResourceCache {
      * @param onUpdateSecurityResource the on update bean.
      */
     private void updateUser(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
         SecurityUser user = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityUser.class);
-        updateLoggedUserCache(user);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            updateLoggedUserCache(user);
+        } else if (DELETE.equals(option)) {
+            loggedUserCache.remove(user.getToken());
+        }
     }
 
     /**
