@@ -158,17 +158,15 @@ public class SecurityHttpFilter implements Filter {
                 return;
             }
 
-            // get resource entity
-            SecurityResourceEntity resourceEntity = cache.getResourceEntity(resourceId);
             // get this resource relation authorities
-            Set<SecurityAuthority> authorities = resourceEntity.getAuthorities();
+            Set<Long> authorityIdSet = cache.getAuthorityIdSet(resourceId);
             // get user authorities
             Set<SecurityAuthority> userAuthorities = context.getAuthorities();
 
             boolean isAllow = false;
-            for (SecurityAuthority authority : authorities) {
+            for (Long authorityId : authorityIdSet) {
                 for (SecurityAuthority userAuthority : userAuthorities) {
-                    if (authority.getId().equals(userAuthority.getId())) {
+                    if (authorityId.equals(userAuthority.getId())) {
                         isAllow = true;
                         break;
                     }
