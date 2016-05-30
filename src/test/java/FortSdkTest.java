@@ -1,6 +1,7 @@
 import com.boyuanitsm.fort.sdk.client.FortCrudClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
+import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,13 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
     void signup(SecurityUser user, HttpServletResponse response) throws FortCrudException, IOException {
         crudClient.signUp(user);
         response.sendRedirect("/login.html");
+    }
+
+    @RequestMapping("/api/update-group/{id}")
+    void updateGroup(@PathVariable("id") Long id) throws FortCrudException {
+        SecurityGroup group = crudClient.getSecurityGroup(id);
+        group.setAllowDeleting(false);
+        crudClient.updateSecurityGroup(group);
     }
 
     public static void main(String[] args) throws Exception {

@@ -3,6 +3,7 @@ package com.boyuanitsm.fort.sdk.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
@@ -23,16 +24,6 @@ import java.util.List;
 @Component
 public class FortClient {
 
-    private static final String API_AUTHENTICATION = "/api/authentication";
-
-    private static final String API_SA_SECURITY_RESOURCE_ENTITIES = "/api/sa/security-resource-entities";
-    private static final String API_SECURITY_NAVS = "/api/security-navs";
-    private static final String API_SA_SECURITY_AUTHORITIES = "/api/sa/security-authorities";
-    private static final String API_SA_SECURITY_ROLES = "/api/sa/security-roles";
-    private static final String API_SECURITY_GROUPS = "/api/security-groups";
-    private static final String API_SECURITY_USER_AUTHORIZATION = "/api/security-user/authorization";
-    private static final String API_SECURITY_USERS_DTO = "/api/security-user-dto";
-
     private CookieStore cookieStore;
     private FortHttpClient fortHttpClient;
 
@@ -50,7 +41,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     private CookieStore loginFortSecurityServer(String appKey, String secret) throws FortCrudException {
-        return fortHttpClient.loginFortSecurityServer(API_AUTHENTICATION,
+        return fortHttpClient.loginFortSecurityServer(API.AUTHENTICATION,
                 new BasicNameValuePair("j_username", appKey),
                 new BasicNameValuePair("j_password", secret),
                 new BasicNameValuePair("remember-me", "true"),
@@ -71,7 +62,7 @@ public class FortClient {
         obj.put("ipAddress", ipAddress);
         obj.put("userAgent", userAgent);
         try {
-            String content = fortHttpClient.postJson(API_SECURITY_USER_AUTHORIZATION, obj);
+            String content = fortHttpClient.postJson(API.SECURITY_USER_AUTHORIZATION, obj);
             return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
         } catch (FortCrudException e) {
             throw new FortAuthenticationException("security user sign in failure!", e);
@@ -85,7 +76,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityResourceEntity> getAllResourceEntities() throws FortCrudException {
-        String content = fortHttpClient.get(API_SA_SECURITY_RESOURCE_ENTITIES);
+        String content = fortHttpClient.get(API.SA_SECURITY_RESOURCE_ENTITIES);
         return JSONArray.parseArray(content, SecurityResourceEntity.class);
     }
 
@@ -96,7 +87,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityNav> getAllSecurityNavs() throws FortCrudException {
-        String content = fortHttpClient.get(API_SECURITY_NAVS);
+        String content = fortHttpClient.get(API.SECURITY_NAVS);
         return JSONArray.parseArray(content, SecurityNav.class);
     }
 
@@ -107,7 +98,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityAuthority> getAllAuthorities() throws FortCrudException {
-        String content = fortHttpClient.get(API_SA_SECURITY_AUTHORITIES);
+        String content = fortHttpClient.get(API.SA_SECURITY_AUTHORITIES);
         return JSONArray.parseArray(content, SecurityAuthority.class);
     }
 
@@ -118,7 +109,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityRole> getAllRoles() throws FortCrudException {
-        String content = fortHttpClient.get(API_SA_SECURITY_ROLES);
+        String content = fortHttpClient.get(API.SA_SECURITY_ROLES);
         return JSONArray.parseArray(content, SecurityRole.class);
     }
 
@@ -129,7 +120,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public List<SecurityGroup> getAllGroups() throws FortCrudException {
-        String content = fortHttpClient.get(API_SECURITY_GROUPS);
+        String content = fortHttpClient.get(API.SECURITY_GROUPS);
         return JSONArray.parseArray(content, SecurityGroup.class);
     }
 
@@ -141,7 +132,7 @@ public class FortClient {
      * @throws FortCrudException
      */
     public SecurityUser getByUserToken(String token) throws FortCrudException {
-        String content = fortHttpClient.get(API_SECURITY_USERS_DTO + "/" + token);
+        String content = fortHttpClient.get(API.SECURITY_USERS_DTO + "/" + token);
         if (content == null) {
             return null;
         }
@@ -156,5 +147,11 @@ public class FortClient {
         }
 
         return cookieString;
+    }
+
+    public void logout(String token) throws FortCrudException {
+        JSONObject json = new JSONObject();
+        json.put("tokenValue", token);
+        fortHttpClient.putJson(API.SECURITY_USER_LOGOUT, json);
     }
 }

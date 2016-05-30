@@ -8,13 +8,11 @@ import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
-import org.apache.http.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.*;
 
 import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass.*;
@@ -40,6 +38,10 @@ public class FortResourceCache {
      * resource url id map.  SecurityResourceEntity.url - SecurityResourceEntity.id.
      */
     private static Map<String, Long> resourceUrlIdMap;
+    /**
+     * resource id - authority ids
+     */
+    private static Map<Long, Set<Long>> resourceAuthoritiesMap;
     /**
      * nav cache. SecurityResourceEntity.id - SecurityNav.
      */
@@ -79,6 +81,7 @@ public class FortResourceCache {
         roleCache = new HashMap<Long, SecurityRole>();
         groupCache = new HashMap<Long, SecurityGroup>();
         loggedUserCache = new HashMap<String, SecurityUser>();
+        resourceAuthoritiesMap = new HashMap<Long, Set<Long>>();
     }
 
     /**
@@ -107,6 +110,7 @@ public class FortResourceCache {
         List<SecurityAuthority> authorities = fortClient.getAllAuthorities();
         for (SecurityAuthority authority : authorities) {
             authorityCache.put(authority.getId(), authority);
+            loadResourceAuthoritiesIdsMap(authority);
         }
         // load roles
         List<SecurityRole> roles = fortClient.getAllRoles();
@@ -120,6 +124,27 @@ public class FortResourceCache {
         }
 
         log.info("Started fort in {} ms", System.currentTimeMillis() - t1);
+        log.debug(resourceAuthoritiesMap.toString());
+    }
+
+    /**
+     * Load resource id - authority ids map
+     *
+     * @param authority the SecurityAuthority
+     */
+    private void loadResourceAuthoritiesIdsMap(SecurityAuthority authority) {
+        for (SecurityResourceEntity resourceEntity: authority.getResources()) {
+            Set<Long> authorities = resourceAuthoritiesMap.get(resourceEntity.getId());
+            if (authorities == null) {
+                authorities = new HashSet<Long>();
+                resourceAuthoritiesMap.put(resourceEntity.getId(), authorities);
+            }
+            authorities.add(authority.getId());
+        }
+    }
+
+    public Set<Long> getAuthorityIdSet(Long resourceId) {
+        return resourceAuthoritiesMap.get(resourceId);
     }
 
     /**
@@ -280,8 +305,14 @@ public class FortResourceCache {
      * @param onUpdateSecurityResource the on update bean.
      */
     private void updateUser(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
         SecurityUser user = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityUser.class);
-        updateLoggedUserCache(user);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            updateLoggedUserCache(user);
+        } else if (DELETE.equals(option)) {
+            loggedUserCache.remove(user.getToken());
+        }
     }
 
     /**
@@ -329,6 +360,36 @@ public class FortResourceCache {
             authorityCache.put(authority.getId(), authority);
         } else if (DELETE.equals(option)) {
             authorityCache.remove(authority.getId());
+        }
+
+        updateResourceAuthoritiesMap(onUpdateSecurityResource);
+    }
+
+    /**
+     * Update resourceAuthoritiesMap
+     *
+     * @param onUpdateSecurityResource the on update bean.
+     */
+    private void updateResourceAuthoritiesMap(OnUpdateSecurityResource onUpdateSecurityResource) {
+        OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
+        SecurityAuthority authority = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityAuthority.class);
+
+        if (POST.equals(option) || PUT.equals(option)) {
+            removeAuthorityFromResourceAuthoritiesMap(authority.getId());
+            loadResourceAuthoritiesIdsMap(authority);
+        } else if (DELETE.equals(option)) {
+            removeAuthorityFromResourceAuthoritiesMap(authority.getId());
+        }
+    }
+
+    /**
+     * Remove this authority from resourceAuthoritiesMap
+     *
+     * @param authorityId the id of the authority
+     */
+    private void removeAuthorityFromResourceAuthoritiesMap(Long authorityId) {
+        for (Long resourceId: resourceAuthoritiesMap.keySet()) {
+            resourceAuthoritiesMap.get(resourceId).remove(authorityId);
         }
     }
 

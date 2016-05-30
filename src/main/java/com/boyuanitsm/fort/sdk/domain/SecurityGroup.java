@@ -19,6 +19,8 @@ public class SecurityGroup implements Serializable {
 
     private String st;
 
+    private boolean isAllowDeleting;
+
     private Set<SecurityUser> users = new HashSet<SecurityUser>();
 
     public Long getId() {
@@ -61,6 +63,14 @@ public class SecurityGroup implements Serializable {
         this.users = securityUsers;
     }
 
+    public boolean isAllowDeleting() {
+        return isAllowDeleting;
+    }
+
+    public void setAllowDeleting(boolean allowDeleting) {
+        isAllowDeleting = allowDeleting;
+    }
+
     @Override
     public String toString() {
         return "SecurityGroup{" +
@@ -68,6 +78,7 @@ public class SecurityGroup implements Serializable {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", st='" + st + '\'' +
+                ", isAllowDeleting=" + isAllowDeleting +
                 ", users=" + users +
                 '}';
     }
