@@ -10,4 +10,5 @@ public final class Constants {
     public static final String LOGIN_FORM_PASSWORD_PARAM_NAME = "f_password";
     public static final String USER_AGENT = "User-Agent";
     public static final String FORT_USER_TOKEN_COOKIE_NAME = "FUSERTOKEN";
+    public static final int HTTP_TIME_OUT = 15 * 1000;
 }

@@ -1,12 +1,14 @@
 package com.boyuanitsm.fort.sdk.client;
 
 import com.alibaba.fastjson.JSON;
+import com.boyuanitsm.fort.sdk.config.Constants;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,17 +43,26 @@ public class FortHttpClient {
 
     private final Logger log = LoggerFactory.getLogger(FortHttpClient.class);
 
+    private String baseUrl;
+
+    private CloseableHttpClient httpClient;
+    private HttpClientContext context;
+    private RequestConfig requestConfig;
+    private CookieStore cookieStore;
+
     @Autowired
     FortHttpClient(FortConfiguration configuration) {
         this.baseUrl = configuration.getApp().getServerBase();
+        httpClient = HttpClients.createDefault();
+        context = HttpClientContext.create();
+        cookieStore = new BasicCookieStore();
         context.setCookieStore(cookieStore);
+        requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(Constants.HTTP_TIME_OUT)
+                .setConnectTimeout(Constants.HTTP_TIME_OUT)
+                .setSocketTimeout(Constants.HTTP_TIME_OUT)
+                .build();
     }
-
-    private String baseUrl;
-
-    private CloseableHttpClient httpClient = HttpClients.createDefault();
-    private HttpClientContext context = HttpClientContext.create();
-    private CookieStore cookieStore = new BasicCookieStore();
 
     CookieStore loginFortSecurityServer(String url, BasicNameValuePair... pairs) throws FortCrudException {
         postForm(url, pairs);
@@ -188,6 +200,7 @@ public class FortHttpClient {
         // Make sure cookie headers are written
         RequestAddCookies addCookies = new RequestAddCookies();
         try {
+            request.setConfig(requestConfig);
             addCookies.process(request, context);
             // send request
             CloseableHttpResponse response = httpClient.execute(request, context);
@@ -198,6 +211,10 @@ public class FortHttpClient {
             // close response
             response.close();
             return content;
+        } catch (SocketTimeoutException e) {
+            // socket time out , reconnection...
+            log.warn("socket time out!", e.getMessage());
+            return null;
         } catch (HttpException | IOException e) {
             throw new FortCrudException(e);
         }
