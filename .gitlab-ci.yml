@@ -1,13 +1,13 @@
 before_script:
     - java -version && mvn -v
 
-job1:
+build_test:
     script:
-        - mvn clean package
+        - mvn package
     stage: test
     only:
         - master
     except:
         - develop
     tags:
-        - java
+        - fort
