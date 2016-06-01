@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
@@ -48,6 +49,21 @@ public class FortCrudClient {
         user.setActivated(true);
 
         fortHttpClient.postJson(API.SECURITY_USERS, user);
+    }
+
+    /**
+     * Change current logged user password. if no logged, do nothing.
+     *
+     * @param newPassword the new password of the SecurityUser
+     * @throws FortCrudException
+     */
+    public void changeCurrentUserPassword(String newPassword) throws FortCrudException {
+        SecurityUser user = FortContextHolder.getContext().getSecurityUser();
+        if (user == null) {
+            return;
+        }
+        user.setPasswordHash(newPassword);
+        fortHttpClient.putJson(API.SECURITY_USERS, user);
     }
 
     // ============= End: Security User Crud ====================
