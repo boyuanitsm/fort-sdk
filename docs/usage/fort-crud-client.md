@@ -18,6 +18,7 @@ private FortCrudClient crudClient;
  java.util.List<SecurityGroup> | getAllSecurityGroup()
  SecurityGroup                 | getSecurityGroup(java.lang.Long id)
  void                          | signUp(SecurityUser user)
+ void                          | changeCurrentUserPassword(SecurityUser user)
  SecurityGroup                 | updateSecurityGroup(SecurityGroup securityGroup)
 
 ### Method Detail
@@ -74,6 +75,18 @@ public void signUp(SecurityUser user)
 Register a new user, before register, set default role,group. role is fort.yml user: defaultRole. multi value comma split. group is fort.yml user: defaultGroup. multi value comma split.
 Parameters:
     user - security user, login, passwordHash required
+Throws:
+    FortCrudException
+```
+
+#### changeCurrentUserPassword
+
+```
+public void changeCurrentUserPassword(String newPassword)
+            throws FortCrudException
+Change current logged user password. if no logged, do nothing.
+Parameters:
+    newPassword - the new password of the SecurityUser
 Throws:
     FortCrudException
 ```
