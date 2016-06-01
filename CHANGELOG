@@ -1,6 +1,6 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
-v 1.1.0-BETA (unreleased)
+v 1.1.0-BETA
 
     - WebSocket断线重连
     - 修复多对多关系会导致栈溢出的问题
