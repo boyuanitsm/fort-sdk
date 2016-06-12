@@ -9,11 +9,14 @@
 *   [Fort security http filter](docs/usage/fort-filter.md)
 *   [Spring component scan](docs/usage/spring-component-scan.md)
 
-## 使用Fort SDK
+### 使用Fort SDK
 
 *   [Fort Crud Client](docs/usage/fort-crud-client.md)
 *   [Security Utils](docs/usage/security-utils.md)
 
-## 实体关系图
+### [实体关系图](docs/images/jhipster-jdl.png)
 
-![domain-jdl](docs/images/jhipster-jdl.png)
+### TODO
+
+*   数据级的权限控制
+*   SDK与服务器之间使用OpenSSL通信
