@@ -4,6 +4,8 @@
 
 ### 开始集成Fort SDK
 
+测试fort服务地址 [http://172.16.8.21:9800](http://172.16.8.21:9800)
+
 *   [Requirements](docs/usage/requirements.md)
 *   [fort.yml](docs/usage/fort-yml.md)
 *   [Fort security http filter](docs/usage/fort-filter.md)
