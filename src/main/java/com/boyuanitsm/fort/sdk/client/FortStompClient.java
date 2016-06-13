@@ -29,7 +29,7 @@ import java.lang.reflect.Type;
 @Component
 public class FortStompClient {
 
-    private final Logger log = LoggerFactory.getLogger(FortClient.class);
+    private final Logger log = LoggerFactory.getLogger(FortStompClient.class);
 
     private FortConfiguration configuration;
     private FortClient client;

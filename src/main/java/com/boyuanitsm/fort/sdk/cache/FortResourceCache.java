@@ -124,7 +124,6 @@ public class FortResourceCache {
         }
 
         log.info("Started fort in {} ms", System.currentTimeMillis() - t1);
-        log.debug(resourceAuthoritiesMap.toString());
     }
 
     /**
