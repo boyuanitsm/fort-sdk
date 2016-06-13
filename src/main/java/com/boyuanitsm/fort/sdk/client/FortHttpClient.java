@@ -199,24 +199,29 @@ public class FortHttpClient {
     private String send(HttpRequestBase request) throws FortCrudException {
         // Make sure cookie headers are written
         RequestAddCookies addCookies = new RequestAddCookies();
+        CloseableHttpResponse response = null;
         try {
             request.setConfig(requestConfig);
             addCookies.process(request, context);
             // send request
-            CloseableHttpResponse response = httpClient.execute(request, context);
+            response = httpClient.execute(request, context);
             // validate http status code
             isSuccess(response, null);
             // get response content
-            String content = EntityUtils.toString(response.getEntity());
-            // close response
-            response.close();
-            return content;
+            return EntityUtils.toString(response.getEntity());
         } catch (SocketTimeoutException e) {
             // socket time out , reconnection...
             log.warn("socket time out!", e.getMessage());
             return null;
         } catch (HttpException | IOException e) {
             throw new FortCrudException(e);
+        } finally {
+            // close response
+            try {
+                response.close();
+            } catch (IOException e) {
+                log.warn("close http response error!", e.getMessage());
+            }
         }
     }
 

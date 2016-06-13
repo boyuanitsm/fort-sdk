@@ -516,7 +516,7 @@ public class FortResourceCache {
                     updateLoggedUserCache(user);
                 }
             } catch (Exception | FortCrudException e) {
-                log.error("Get user by token error! token: {}", token);
+                log.error("Get user by token error! token: {}", token, e.getMessage());
                 return null;
             }
         }
