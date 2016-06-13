@@ -30,7 +30,7 @@ fort:
         unauthorized-return: /unauthorized.html
         # 登录
         login:
-            # 登录URL
+            # 登录URL, 登录时发送POST请求到这个地址, 用户名的参数名为f_username, 密码的参数名为f_password
             url: /fort/login
             # 登录成功时，重定向的地址
             success-return: /index.html
@@ -47,7 +47,7 @@ fort:
     # 用户模块
     user:
         # 创建新用户时，用户拥有的角色名，多个使用,隔开
-        default-roles: user
+        default-roles: ROLE_USER
         # 创建新用户时，用户所属组名，多个使用,隔开
-        default-groups: dev
+        default-groups: WORK_GROUP
 ```
