@@ -37,7 +37,8 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @RequestMapping("/api/signup")
     void signup(SecurityUser user, HttpServletResponse response) throws FortCrudException, IOException {
-        crudClient.signUp(user);
+        user = crudClient.signUp(user);
+        System.out.println(user);
         response.sendRedirect("/login.html");
     }
 

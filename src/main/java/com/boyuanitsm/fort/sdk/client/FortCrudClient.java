@@ -39,16 +39,18 @@ public class FortCrudClient {
      * group is fort.yml user: defaultGroup. multi value comma split.
      *
      * @param user security user, login, passwordHash required
+     * @return new user
      * @throws FortCrudException
      */
-    public void signUp(SecurityUser user) throws FortCrudException {
+    public SecurityUser signUp(SecurityUser user) throws FortCrudException {
         // set default role, group
         user.setRoles(cache.getRolesByArrayNames(configuration.getUser().getDefaultRoles()));
         user.setGroups(cache.getGroupsByArrayNames(configuration.getUser().getDefaultGroups()));
         // activated
         user.setActivated(true);
 
-        fortHttpClient.postJson(API.SECURITY_USERS, user);
+        String content = fortHttpClient.postJson(API.SECURITY_USERS, user);
+        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
     }
 
     /**
