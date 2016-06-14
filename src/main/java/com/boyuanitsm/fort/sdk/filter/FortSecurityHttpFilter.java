@@ -23,14 +23,14 @@ import java.util.Set;
 import static com.boyuanitsm.fort.sdk.config.Constants.*;
 
 /**
- * Security Http Filter
+ * Fort Security Http Filter
  *
  * @author zhanghua on 5/17/16.
  */
 @Component
-public class SecurityHttpFilter implements Filter {
+public class FortSecurityHttpFilter implements Filter {
 
-    private final Logger log = LoggerFactory.getLogger(SecurityHttpFilter.class);
+    private final Logger log = LoggerFactory.getLogger(FortSecurityHttpFilter.class);
 
     @Autowired
     private FortConfiguration configuration;
