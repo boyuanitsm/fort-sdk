@@ -1,5 +1,10 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.1.1-BETA
+
+    - 在文档上增加登录的请求参数名称
+    - Http请求失败时也及时关闭连接，防止出现线程池等待超时
+
 v 1.1.0-BETA
 
     - WebSocket断线重连
