@@ -2,6 +2,8 @@
 
 ![Build Status](http://180.167.77.58:30000/fort/fort-sdk/badges/master/build.svg)
 
+[Fort Docs](http://172.16.8.21:9801)
+
 ### 开始集成Fort SDK
 
 测试fort服务地址 [http://172.16.8.21:9800](http://172.16.8.21:9800)
