@@ -51,25 +51,26 @@ public class SecurityHttpFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+        String contextPath = request.getContextPath();
         String requestUri = request.getRequestURI();
+
+        if (!contextPath.isEmpty()) {
+            // fix context path
+            requestUri = requestUri.replace(contextPath, "");
+        }
 
         log.debug("request uri: {}", requestUri);
 
         if (configuration.getLogin().getUrl().equals(requestUri)) {
             handler.signIn(request, response);
-            return;
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
             handler.logout(request, response);
-            return;
-        } else {
+        } else if (cache.getResourceId(requestUri) != null) {
             Long resourceId = cache.getResourceId(requestUri);
-            if (resourceId != null) {
-                handler.authentication(request, response, chain, resourceId);
-                return;
-            }
+            handler.authentication(request, response, chain, resourceId);
+        } else {
+            chain.doFilter(request, response);
         }
-
-        chain.doFilter(request, response);
     }
 
     public void destroy() {
