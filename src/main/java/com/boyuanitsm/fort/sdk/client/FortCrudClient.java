@@ -1,6 +1,5 @@
 package com.boyuanitsm.fort.sdk.client;
 
-import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
@@ -9,9 +8,12 @@ import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
 import com.boyuanitsm.fort.sdk.domain.SecurityUser;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
+import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,8 @@ public class FortCrudClient {
     @Autowired
     private FortHttpClient fortHttpClient;
 
+    private ObjectMapper mapper = ObjectMapperBuilder.build();
+
     // ============= Start: Security User Crud ====================
 
     /**
@@ -42,7 +46,16 @@ public class FortCrudClient {
      * @return new user
      * @throws FortCrudException
      */
-    public SecurityUser signUp(SecurityUser user) throws FortCrudException {
+    public SecurityUser signUp(SecurityUser user) throws FortCrudException, IOException {
+        if (user == null) {
+            throw new FortCrudException("user is can't be null!");
+        }
+        if (user.getLogin() == null || user.getLogin().isEmpty()) {
+            throw new FortCrudException("user.login is can't be null!");
+        }
+        if (user.getPasswordHash() == null || user.getPasswordHash().isEmpty()) {
+            throw new FortCrudException("user.passwordHash is can't be null!");
+        }
         return signUp(user, configuration.getUser().getDefaultRoles(), configuration.getUser().getDefaultGroups());
     }
 
@@ -54,8 +67,9 @@ public class FortCrudClient {
      * @param groups the user groups
      * @return new user
      * @throws FortCrudException
+     * @throws IOException
      */
-    public SecurityUser signUp(SecurityUser user, String[] roles, String[] groups) throws FortCrudException {
+    public SecurityUser signUp(SecurityUser user, String[] roles, String[] groups) throws FortCrudException, IOException {
         // set default role, group
         if (roles != null) {
             user.setRoles(cache.getRolesByArrayNames(roles));
@@ -67,7 +81,7 @@ public class FortCrudClient {
         user.setActivated(true);
 
         String content = fortHttpClient.postJson(API.SECURITY_USERS, user);
-        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
+        return mapper.readValue(content, SecurityUser.class);
     }
 
     /**
@@ -75,8 +89,9 @@ public class FortCrudClient {
      *
      * @param newPassword the new password of the SecurityUser
      * @throws FortCrudException
+     * @throws IOException
      */
-    public void changeCurrentUserPassword(String newPassword) throws FortCrudException {
+    public void changeCurrentUserPassword(String newPassword) throws FortCrudException, IOException {
         SecurityUser user = FortContextHolder.getContext().getSecurityUser();
         if (user == null) {
             return;
@@ -97,9 +112,10 @@ public class FortCrudClient {
      * @return the ResponseEntity with status 201 (Created) and with body the new securityGroup, or with throw {@link FortNoValidException}
      * 400 (Bad Request) if the securityGroup has already an ID
      * @throws FortCrudException
+     * @throws IOException
      */
-    public SecurityGroup createSecurityGroup(SecurityGroup securityGroup) throws FortCrudException {
-        return JSON.toJavaObject(JSON.parseObject(fortHttpClient.postJson(API.SECURITY_GROUPS, securityGroup)), SecurityGroup.class);
+    public SecurityGroup createSecurityGroup(SecurityGroup securityGroup) throws FortCrudException, IOException {
+        return mapper.readValue(fortHttpClient.postJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
     }
 
     /**
@@ -110,9 +126,10 @@ public class FortCrudClient {
      * or throw {@link FortNoValidException}  if the securityGroup is not valid,
      * or throw {@link FortCrudException} (Internal Server Error) if the securityGroup couldnt be updated
      * @throws FortCrudException if the Location URI syntax is incorrect
+     * @throws IOException
      */
-    public SecurityGroup updateSecurityGroup(SecurityGroup securityGroup) throws FortCrudException {
-        return JSON.toJavaObject(JSON.parseObject(fortHttpClient.putJson(API.SECURITY_GROUPS, securityGroup)), SecurityGroup.class);
+    public SecurityGroup updateSecurityGroup(SecurityGroup securityGroup) throws FortCrudException, IOException {
+        return mapper.readValue(fortHttpClient.putJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
     }
 
     /**

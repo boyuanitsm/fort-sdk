@@ -1,11 +1,11 @@
 package com.boyuanitsm.fort.sdk.client;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,11 @@ public class FortStompClient {
     @Autowired
     private FortResourceCache cache;
 
+    private ObjectMapper mapper;
+
     @Autowired
     public FortStompClient(FortClient client, FortConfiguration configuration) {
+        mapper = ObjectMapperBuilder.build();
         this.configuration = configuration;
         this.client = client;
         connect();
@@ -98,7 +101,7 @@ public class FortStompClient {
                 public void handleFrame(StompHeaders stompHeaders, Object o) {
                     try {
                         // update cache
-                        OnUpdateSecurityResource onUpdateSecurityResource = JSON.toJavaObject(JSONObject.parseObject(o.toString()), OnUpdateSecurityResource.class);
+                        OnUpdateSecurityResource onUpdateSecurityResource = mapper.readValue(o.toString(), OnUpdateSecurityResource.class);
                         cache.updateResource(onUpdateSecurityResource);
                     } catch (Exception e) {
                         log.error("Update security resource error! {}", o, e);

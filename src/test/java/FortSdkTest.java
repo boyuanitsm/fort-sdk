@@ -43,7 +43,7 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
     }
 
     @RequestMapping("/api/update-group/{id}")
-    void updateGroup(@PathVariable("id") Long id) throws FortCrudException {
+    void updateGroup(@PathVariable("id") Long id) throws FortCrudException, IOException {
         SecurityGroup group = crudClient.getSecurityGroup(id);
         group.setAllowDeleting(false);
         crudClient.updateSecurityGroup(group);

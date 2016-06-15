@@ -1,10 +1,9 @@
 package com.boyuanitsm.fort.sdk.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -14,15 +13,14 @@ import java.util.Map;
  * @author zhanghua on 5/16/16.
  */
 @Component
+@SuppressWarnings(value = {"unchecked"})
 public class FortConfiguration {
-
-    private final Logger log = LoggerFactory.getLogger(FortConfiguration.class);
 
     private final App app;
     private final Authentication authentication;
     private final User user;
 
-    public FortConfiguration() {
+    public FortConfiguration() throws IOException {
         Yaml yaml = new Yaml();
         InputStream is = FortConfiguration.class.getClassLoader().getResourceAsStream("fort.yml");
         Map<String, Object> conf = ((Map<String, Map<String, Object>>) yaml.load(is)).get("fort");

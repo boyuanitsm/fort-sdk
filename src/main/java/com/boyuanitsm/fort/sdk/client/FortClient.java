@@ -1,20 +1,24 @@
 package com.boyuanitsm.fort.sdk.client;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
+import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A fort client. packaging fort http interface.
@@ -26,9 +30,11 @@ public class FortClient {
 
     private CookieStore cookieStore;
     private FortHttpClient fortHttpClient;
+    private ObjectMapper mapper;
 
     @Autowired
     public FortClient(FortConfiguration configuration, FortHttpClient fortHttpClient) throws FortCrudException {
+        mapper = ObjectMapperBuilder.build();
         this.fortHttpClient = fortHttpClient;
         this.cookieStore = loginFortSecurityServer(configuration.getApp().getAppKey(), configuration.getApp().getAppSecret());
     }
@@ -56,15 +62,15 @@ public class FortClient {
      * @throws FortAuthenticationException if validate failure, throw exception
      */
     public SecurityUser signIn(String login, String password, String ipAddress, String userAgent) throws FortAuthenticationException {
-        JSONObject obj = new JSONObject();
+        Map<String, Object> obj = new HashMap<>();
         obj.put("login", login);
         obj.put("passwordHash", password);
         obj.put("ipAddress", ipAddress);
         obj.put("userAgent", userAgent);
         try {
             String content = fortHttpClient.postJson(API.SECURITY_USER_AUTHORIZATION, obj);
-            return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
-        } catch (FortCrudException e) {
+            return mapper.readValue(content, SecurityUser.class);
+        } catch (FortCrudException | IOException e) {
             throw new FortAuthenticationException("security user sign in failure!", e);
         }
     }
@@ -74,10 +80,11 @@ public class FortClient {
      *
      * @return this app all security resource entities
      * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityResourceEntity> getAllResourceEntities() throws FortCrudException {
+    public List<SecurityResourceEntity> getAllResourceEntities() throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SA_SECURITY_RESOURCE_ENTITIES);
-        return JSONArray.parseArray(content, SecurityResourceEntity.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityResourceEntity.class));
     }
 
     /**
@@ -85,10 +92,11 @@ public class FortClient {
      *
      * @return this app all security navs.
      * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityNav> getAllSecurityNavs() throws FortCrudException {
+    public List<SecurityNav> getAllSecurityNavs() throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SECURITY_NAVS);
-        return JSONArray.parseArray(content, SecurityNav.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityNav.class));
     }
 
     /**
@@ -96,10 +104,11 @@ public class FortClient {
      *
      * @return this app all security authorities.
      * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityAuthority> getAllAuthorities() throws FortCrudException {
+    public List<SecurityAuthority> getAllAuthorities() throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SA_SECURITY_AUTHORITIES);
-        return JSONArray.parseArray(content, SecurityAuthority.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityAuthority.class));
     }
 
     /**
@@ -107,10 +116,11 @@ public class FortClient {
      *
      * @return this app all security roles.
      * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityRole> getAllRoles() throws FortCrudException {
+    public List<SecurityRole> getAllRoles() throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SA_SECURITY_ROLES);
-        return JSONArray.parseArray(content, SecurityRole.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityRole.class));
     }
 
     /**
@@ -118,10 +128,11 @@ public class FortClient {
      *
      * @return this app all security groups.
      * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityGroup> getAllGroups() throws FortCrudException {
+    public List<SecurityGroup> getAllGroups() throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SECURITY_GROUPS);
-        return JSONArray.parseArray(content, SecurityGroup.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityGroup.class));
     }
 
     /**
@@ -131,12 +142,12 @@ public class FortClient {
      * @return user
      * @throws FortCrudException
      */
-    public SecurityUser getByUserToken(String token) throws FortCrudException {
+    public SecurityUser getByUserToken(String token) throws FortCrudException, IOException {
         String content = fortHttpClient.get(API.SECURITY_USERS_DTO + "/" + token);
         if (content == null) {
             return null;
         }
-        return JSON.toJavaObject(JSON.parseObject(content), SecurityUser.class);
+        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityGroup.class));
     }
 
     String getCookieString() {
@@ -149,8 +160,8 @@ public class FortClient {
         return cookieString;
     }
 
-    public void logout(String token) throws FortCrudException {
-        JSONObject json = new JSONObject();
+    public void logout(String token) throws FortCrudException, JsonProcessingException {
+        Map<String, Object> json = new HashMap<>();
         json.put("tokenValue", token);
         fortHttpClient.putJson(API.SECURITY_USER_LOGOUT, json);
     }

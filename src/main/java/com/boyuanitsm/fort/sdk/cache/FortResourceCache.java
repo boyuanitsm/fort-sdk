@@ -1,6 +1,5 @@
 package com.boyuanitsm.fort.sdk.cache;
 
-import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption;
@@ -8,11 +7,14 @@ import com.boyuanitsm.fort.sdk.client.FortClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
+import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass.*;
@@ -64,8 +66,11 @@ public class FortResourceCache {
      */
     private static Map<String, SecurityUser> loggedUserCache;
 
+    private ObjectMapper mapper;
+
     @Autowired
-    public FortResourceCache(FortClient fortClient) throws FortCrudException {
+    public FortResourceCache(FortClient fortClient) throws FortCrudException, IOException {
+        mapper = ObjectMapperBuilder.build();
         this.fortClient = fortClient;// autowired fort client
         load();// load resource
     }
@@ -89,7 +94,7 @@ public class FortResourceCache {
      *
      * @throws FortCrudException
      */
-    private void load() throws FortCrudException {
+    private void load() throws FortCrudException, IOException {
         log.info("Starting fort");
         long t1 = System.currentTimeMillis();
 
@@ -275,7 +280,7 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the entity
      */
-    public void updateResource(OnUpdateSecurityResource onUpdateSecurityResource) {
+    public void updateResource(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         // get resource class enum
         OnUpdateSecurityResourceClass resourceClass = onUpdateSecurityResource.getResourceClass();
         if (SECURITY_RESOURCE_ENTITY.equals(resourceClass)) {// update resource entity
@@ -303,9 +308,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateUser(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateUser(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityUser user = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityUser.class);
+        SecurityUser user = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityUser.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             updateLoggedUserCache(user);
@@ -319,9 +324,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateRole(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateRole(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityRole role = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityRole.class);
+        SecurityRole role = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityRole.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             roleCache.put(role.getId(), role);
@@ -335,9 +340,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update group.
      */
-    private void updateGroup(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateGroup(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityGroup group = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityGroup.class);
+        SecurityGroup group = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityGroup.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             groupCache.put(group.getId(), group);
@@ -351,9 +356,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateAuthority(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateAuthority(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityAuthority authority = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityAuthority.class);
+        SecurityAuthority authority = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityAuthority.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             authorityCache.put(authority.getId(), authority);
@@ -369,9 +374,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateResourceAuthoritiesMap(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateResourceAuthoritiesMap(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityAuthority authority = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityAuthority.class);
+        SecurityAuthority authority = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityAuthority.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             removeAuthorityFromResourceAuthoritiesMap(authority.getId());
@@ -397,9 +402,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateNav(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateNav(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityNav nav = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityNav.class);
+        SecurityNav nav = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityNav.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             if (nav.getResource() != null) {
@@ -415,9 +420,9 @@ public class FortResourceCache {
      *
      * @param onUpdateSecurityResource the on update bean.
      */
-    private void updateResourceEntity(OnUpdateSecurityResource onUpdateSecurityResource) {
+    private void updateResourceEntity(OnUpdateSecurityResource onUpdateSecurityResource) throws IOException {
         OnUpdateSecurityResourceOption option = onUpdateSecurityResource.getOption();
-        SecurityResourceEntity resource = JSON.toJavaObject((JSON) onUpdateSecurityResource.getData(), SecurityResourceEntity.class);
+        SecurityResourceEntity resource = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityResourceEntity.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
             resourceEntityCache.put(resource.getId(), resource);

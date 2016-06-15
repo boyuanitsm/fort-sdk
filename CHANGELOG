@@ -1,5 +1,10 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.2.0
+
+    - 使用Jackson替代Alibaba fastjson序列化json
+    - 稳定性提升
+
 v 1.1.2-BETA
 
     - 注册用户成功时, 返回这个用户

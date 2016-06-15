@@ -1,5 +1,7 @@
 package com.boyuanitsm.fort.sdk.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -28,6 +30,7 @@ public class SecurityUser implements Serializable {
 
     private String token;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Z")
     private Date tokenOverdueTime;
 
     private Set<SecurityRole> roles = new HashSet<SecurityRole>();
