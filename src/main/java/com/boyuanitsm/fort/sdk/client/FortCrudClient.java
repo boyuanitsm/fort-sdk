@@ -43,9 +43,26 @@ public class FortCrudClient {
      * @throws FortCrudException
      */
     public SecurityUser signUp(SecurityUser user) throws FortCrudException {
+        return signUp(user, configuration.getUser().getDefaultRoles(), configuration.getUser().getDefaultGroups());
+    }
+
+    /**
+     * Register a new user, using given roles and groups
+     *
+     * @param user security user, login, passwordHash required
+     * @param roles the user roles
+     * @param groups the user groups
+     * @return new user
+     * @throws FortCrudException
+     */
+    public SecurityUser signUp(SecurityUser user, String[] roles, String[] groups) throws FortCrudException {
         // set default role, group
-        user.setRoles(cache.getRolesByArrayNames(configuration.getUser().getDefaultRoles()));
-        user.setGroups(cache.getGroupsByArrayNames(configuration.getUser().getDefaultGroups()));
+        if (roles != null) {
+            user.setRoles(cache.getRolesByArrayNames(roles));
+        }
+        if (groups != null) {
+            user.setGroups(cache.getGroupsByArrayNames(groups));
+        }
         // activated
         user.setActivated(true);
 
