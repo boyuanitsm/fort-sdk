@@ -22,6 +22,11 @@ public final class SecurityUtils {
      */
     public static String getCurrentUserLogin() {
         SecurityUser user = getSecurityUser();
+
+        if (user == null) {
+            return null;
+        }
+
         return user.getLogin();
     }
 
@@ -33,6 +38,11 @@ public final class SecurityUtils {
      */
     public static boolean isCurrentUserInRole(String roleName) {
         SecurityUser user = getSecurityUser();
+
+        if (user == null) {
+            return false;
+        }
+
         Set<SecurityRole> roleSet = user.getRoles();
 
         for (SecurityRole role: roleSet) {
@@ -51,6 +61,11 @@ public final class SecurityUtils {
      */
     public static Set<SecurityRole> getCurrentUserRoles() {
         SecurityUser user = getSecurityUser();
+
+        if (user == null) {
+            return null;
+        }
+
         return user.getRoles();
     }
 
@@ -61,6 +76,11 @@ public final class SecurityUtils {
      */
     public static Set<SecurityGroup> getCurrentUserGroups() {
         SecurityUser user = getSecurityUser();
+
+        if (user == null) {
+            return null;
+        }
+
         return user.getGroups();
     }
 
@@ -70,6 +90,9 @@ public final class SecurityUtils {
      * @return the login of the current user authorities.
      */
     public static Set<SecurityAuthority> getCurrentUserAuthorities() {
+        if (FortContextHolder.getContext() == null) {
+            return null;
+        }
         return FortContextHolder.getContext().getAuthorities();
     }
 
@@ -79,6 +102,9 @@ public final class SecurityUtils {
      * @return the login of the current user tree security navs.
      */
     public static List<TreeSecurityNav> getCurrentUserTreeSecurityNavs() {
+        if (FortContextHolder.getContext() == null) {
+            return null;
+        }
         return FortContextHolder.getContext().getNavs();
     }
 
@@ -88,6 +114,9 @@ public final class SecurityUtils {
      * @return the login of the current user;
      */
     private static SecurityUser getSecurityUser() {
+        if (FortContextHolder.getContext() == null) {
+            return null;
+        }
         return FortContextHolder.getContext().getSecurityUser();
     }
 }
