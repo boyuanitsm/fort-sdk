@@ -69,7 +69,7 @@ public class FortResourceCache {
     private ObjectMapper mapper;
 
     @Autowired
-    public FortResourceCache(FortClient fortClient) throws FortCrudException {
+    public FortResourceCache(FortClient fortClient) throws FortCrudException, IOException {
         mapper = ObjectMapperBuilder.build();
         this.fortClient = fortClient;// autowired fort client
         load();// load resource
@@ -94,7 +94,7 @@ public class FortResourceCache {
      *
      * @throws FortCrudException
      */
-    private void load() throws FortCrudException {
+    private void load() throws FortCrudException, IOException {
         log.info("Starting fort");
         long t1 = System.currentTimeMillis();
 

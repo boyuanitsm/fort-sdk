@@ -1,10 +1,12 @@
 package com.boyuanitsm.fort.sdk.client;
 
-import com.alibaba.fastjson.JSON;
 import com.boyuanitsm.fort.sdk.config.Constants;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
+import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -50,8 +52,11 @@ public class FortHttpClient {
     private RequestConfig requestConfig;
     private CookieStore cookieStore;
 
+    private ObjectMapper mapper;
+
     @Autowired
     FortHttpClient(FortConfiguration configuration) {
+        mapper = ObjectMapperBuilder.build();
         this.baseUrl = configuration.getApp().getServerBase();
         httpClient = HttpClients.createDefault();
         context = HttpClientContext.create();
@@ -99,13 +104,14 @@ public class FortHttpClient {
      * @param json json
      * @return response content
      * @throws FortCrudException
+     * @throws JsonProcessingException
      */
-    String postJson(String url, JSON json) throws FortCrudException {
+    String postJson(String url, String json) throws FortCrudException, JsonProcessingException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set json string entity
         try {
-            post.setEntity(new StringEntity(json.toJSONString()));
+            post.setEntity(new StringEntity(json));
         } catch (UnsupportedEncodingException e) {
             throw new FortCrudException(e);
         }
@@ -123,9 +129,10 @@ public class FortHttpClient {
      * @param obj obj
      * @return response content
      * @throws FortCrudException
+     * @throws JsonProcessingException
      */
-    String postJson(String url, Object obj) throws FortCrudException {
-        JSON json = (JSON) JSON.toJSON(obj);
+    String postJson(String url, Object obj) throws FortCrudException, JsonProcessingException {
+        String json = mapper.writeValueAsString(obj);
         return postJson(url, json);
     }
 
@@ -137,12 +144,12 @@ public class FortHttpClient {
      * @return response content
      * @throws FortCrudException
      */
-    String putJson(String url, JSON json) throws FortCrudException {
+    String putJson(String url, String json) throws FortCrudException {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPut put = new HttpPut(fullPostUrl.toString());
         // set json string entity
         try {
-            put.setEntity(new StringEntity(json.toJSONString()));
+            put.setEntity(new StringEntity(json));
         } catch (UnsupportedEncodingException e) {
             throw new FortCrudException(e);
         }
@@ -158,9 +165,10 @@ public class FortHttpClient {
      * @param obj obj
      * @return response content
      * @throws FortCrudException
+     * @throws JsonProcessingException
      */
-    String putJson(String url, Object obj) throws FortCrudException {
-        JSON json = (JSON) JSON.toJSON(obj);
+    String putJson(String url, Object obj) throws FortCrudException, JsonProcessingException {
+        String json = mapper.writeValueAsString(obj);
         return putJson(url, json);
     }
 
