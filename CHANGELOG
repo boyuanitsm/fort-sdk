@@ -1,5 +1,12 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.1.2-BETA
+
+    - 注册用户成功时, 返回这个用户
+    - 资源URL中不必包含ContextPath
+    - 安全过滤器重命名为FortSecurityHttpFilter, 在web.xml中设置过滤器时使用Spring代理
+    - 修复未登录时使用SecurityUtils会出现空指针异常
+
 v 1.1.1-BETA
 
     - 在文档上增加登录的请求参数名称
