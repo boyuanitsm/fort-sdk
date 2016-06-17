@@ -226,7 +226,9 @@ public class FortHttpClient {
         } finally {
             // close response
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
             } catch (IOException e) {
                 log.warn("close http response error!", e.getMessage());
             }
