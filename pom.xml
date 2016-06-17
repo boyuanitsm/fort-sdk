@@ -7,6 +7,20 @@
     <groupId>com.boyuanitsm</groupId>
     <artifactId>fort-sdk</artifactId>
     <version>1.2.0</version>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Releases Repository</name>
+            <url>http://172.16.8.21:20001/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshots Repository</name>
+            <url>http://172.16.8.21:20001/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
