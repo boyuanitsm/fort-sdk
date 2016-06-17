@@ -4,8 +4,7 @@ import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
-import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
-import com.boyuanitsm.fort.sdk.domain.SecurityUser;
+import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
@@ -85,6 +84,32 @@ public class FortCrudClient {
     }
 
     /**
+     * Get security user by login
+     *
+     * @param login the login of the security user
+     * @return if not found return null
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public SecurityUser getSecurityUser(String login) throws FortCrudException, IOException {
+        return null;
+    }
+
+    /**
+     * PUT /security-users : Updates an existing securityUser.
+     *
+     * @param user the securityUser to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityGroup,
+     * or throw {@link FortNoValidException}  if the securityUser is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityUser couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public SecurityUser updateSecurityUser(SecurityUser user) throws FortCrudException, IOException {
+        return null;
+    }
+
+    /**
      * Change current logged user password. if no logged, do nothing.
      *
      * @param newPassword the new password of the SecurityUser
@@ -101,7 +126,6 @@ public class FortCrudClient {
     }
 
     // ============= End: Security User Crud ====================
-
 
     // ============= Start: Security Group Crud ====================
 
@@ -164,4 +188,100 @@ public class FortCrudClient {
     }
 
     // ============= End: Security Group Crud ====================
+
+    // ============= Start: Security Resource Entity Crud ====================
+
+    public SecurityResourceEntity createSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityResourceEntity updateSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityResourceEntity> getAllSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) {
+        return null;
+    }
+
+    public SecurityResourceEntity getSecurityResourceEntity(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityResourceEntity(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Resource Entity Crud ====================
+
+    // ============= Start: Security Nav Crud ====================
+
+    public SecurityNav createSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityNav updateSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityNav> getAllSecurityNav(SecurityNav securityNav) {
+        return null;
+    }
+
+    public SecurityNav getSecurityNav(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityNav(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Nav Crud ====================
+
+    // ============= Start: Security Authority Crud ====================
+
+    public SecurityAuthority createSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityAuthority updateSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityAuthority> getAllSecurityAuthority(SecurityAuthority securityAuthority) {
+        return null;
+    }
+
+    public SecurityAuthority getSecurityAuthority(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityAuthority(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Authority Crud ====================
+
+    // ============= Start: Security Role Crud ====================
+
+    public SecurityRole createSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityRole updateSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityRole> getAllSecurityRole(SecurityRole securityRole) {
+        return null;
+    }
+
+    public SecurityRole getSecurityRole(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityRole(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Role Crud ====================
 }
