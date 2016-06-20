@@ -1,5 +1,6 @@
 package com.boyuanitsm.fort.sdk.client;
 
+import com.boyuanitsm.fort.sdk.bean.Pageable;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
@@ -9,6 +10,10 @@ import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +29,8 @@ import java.util.Map;
  */
 @Component
 public class FortCrudClient {
+
+    private final Logger log = LoggerFactory.getLogger(FortCrudClient.class);
 
     @Autowired
     private FortResourceCache cache;
@@ -84,6 +91,24 @@ public class FortCrudClient {
     }
 
     /**
+     * GET  /security-users : get all the securityUsers.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityUsers in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityUser> getAllSecurityUser(Pageable pageable) throws FortCrudException, IOException {
+        if (pageable == null) {
+            pageable = new Pageable();
+        }
+        return mapper.readValue(fortHttpClient.get(API.SECURITY_USERS,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                    TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityUser.class));
+    }
+
+    /**
      * Get security user by login
      *
      * @param login the login of the security user
@@ -92,21 +117,27 @@ public class FortCrudClient {
      * @throws IOException
      */
     public SecurityUser getSecurityUser(String login) throws FortCrudException, IOException {
-        return null;
+        try {
+            String content = fortHttpClient.get(API.SECURITY_USER_BY_LOGIN + "/" + login);
+            return mapper.readValue(content, SecurityUser.class);
+        } catch (FortCrudException e) {
+            log.warn("Not found {} user.", login, e.getMessage());
+            return null;
+        }
     }
 
     /**
      * PUT /security-users : Updates an existing securityUser.
      *
-     * @param user the securityUser to update
+     * @param securityUser the securityUser to update
      * @return the ResponseEntity with status 200 (OK) and with body the updated securityGroup,
      * or throw {@link FortNoValidException}  if the securityUser is not valid,
      * or throw {@link FortCrudException} (Internal Server Error) if the securityUser couldnt be updated
      * @throws FortCrudException
      * @throws IOException
      */
-    public SecurityUser updateSecurityUser(SecurityUser user) throws FortCrudException, IOException {
-        return null;
+    public SecurityUser updateSecurityUser(SecurityUser securityUser) throws FortCrudException, IOException {
+        return mapper.readValue(fortHttpClient.putJson(API.SECURITY_USERS, securityUser), SecurityUser.class);
     }
 
     /**

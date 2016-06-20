@@ -10,6 +10,7 @@ public class API {
     public static final String SECURITY_USERS = "/api/security-users";
     public static final String SECURITY_GROUPS = "/api/security-groups";
     public static final String SECURITY_USER_LOGOUT = "/api/security-user-logout";
+    public static final String SECURITY_USER_BY_LOGIN = "/api/security-user-by-login";
     public static final String AUTHENTICATION = "/api/authentication";
     public static final String SA_SECURITY_RESOURCE_ENTITIES = "/api/sa/security-resource-entities";
     public static final String SECURITY_NAVS = "/api/security-navs";
