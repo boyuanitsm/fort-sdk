@@ -33,7 +33,7 @@ public class FortCrudClientIntTest {
     public void setup() {
     }
 
-    @Test
+    // @Test
     public void testSignUp() throws IOException, FortCrudException {
         SecurityUser user = new SecurityUser();
         user.setLogin("A1111111");
