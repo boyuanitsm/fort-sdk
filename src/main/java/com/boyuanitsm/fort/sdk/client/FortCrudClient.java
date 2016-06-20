@@ -1,15 +1,19 @@
 package com.boyuanitsm.fort.sdk.client;
 
+import com.boyuanitsm.fort.sdk.bean.Pageable;
 import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
 import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.FortConfiguration;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
-import com.boyuanitsm.fort.sdk.domain.SecurityGroup;
-import com.boyuanitsm.fort.sdk.domain.SecurityUser;
+import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +29,8 @@ import java.util.Map;
  */
 @Component
 public class FortCrudClient {
+
+    private final Logger log = LoggerFactory.getLogger(FortCrudClient.class);
 
     @Autowired
     private FortResourceCache cache;
@@ -85,6 +91,56 @@ public class FortCrudClient {
     }
 
     /**
+     * GET  /security-users : get all the securityUsers.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityUsers in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityUser> getAllSecurityUser(Pageable pageable) throws FortCrudException, IOException {
+        if (pageable == null) {
+            pageable = new Pageable();
+        }
+        return mapper.readValue(fortHttpClient.get(API.SECURITY_USERS,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                    TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityUser.class));
+    }
+
+    /**
+     * Get security user by login
+     *
+     * @param login the login of the security user
+     * @return if not found return null
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public SecurityUser getSecurityUser(String login) throws FortCrudException, IOException {
+        try {
+            String content = fortHttpClient.get(API.SECURITY_USER_BY_LOGIN + "/" + login);
+            return mapper.readValue(content, SecurityUser.class);
+        } catch (FortCrudException e) {
+            log.warn("Not found {} user.", login, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * PUT /security-users : Updates an existing securityUser.
+     *
+     * @param securityUser the securityUser to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityGroup,
+     * or throw {@link FortNoValidException}  if the securityUser is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityUser couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public SecurityUser updateSecurityUser(SecurityUser securityUser) throws FortCrudException, IOException {
+        return mapper.readValue(fortHttpClient.putJson(API.SECURITY_USERS, securityUser), SecurityUser.class);
+    }
+
+    /**
      * Change current logged user password. if no logged, do nothing.
      *
      * @param newPassword the new password of the SecurityUser
@@ -101,7 +157,6 @@ public class FortCrudClient {
     }
 
     // ============= End: Security User Crud ====================
-
 
     // ============= Start: Security Group Crud ====================
 
@@ -164,4 +219,100 @@ public class FortCrudClient {
     }
 
     // ============= End: Security Group Crud ====================
+
+    // ============= Start: Security Resource Entity Crud ====================
+
+    public SecurityResourceEntity createSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityResourceEntity updateSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityResourceEntity> getAllSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) {
+        return null;
+    }
+
+    public SecurityResourceEntity getSecurityResourceEntity(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityResourceEntity(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Resource Entity Crud ====================
+
+    // ============= Start: Security Nav Crud ====================
+
+    public SecurityNav createSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityNav updateSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityNav> getAllSecurityNav(SecurityNav securityNav) {
+        return null;
+    }
+
+    public SecurityNav getSecurityNav(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityNav(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Nav Crud ====================
+
+    // ============= Start: Security Authority Crud ====================
+
+    public SecurityAuthority createSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityAuthority updateSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityAuthority> getAllSecurityAuthority(SecurityAuthority securityAuthority) {
+        return null;
+    }
+
+    public SecurityAuthority getSecurityAuthority(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityAuthority(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Authority Crud ====================
+
+    // ============= Start: Security Role Crud ====================
+
+    public SecurityRole createSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public SecurityRole updateSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
+        return null;
+    }
+
+    public List<SecurityRole> getAllSecurityRole(SecurityRole securityRole) {
+        return null;
+    }
+
+    public SecurityRole getSecurityRole(Long id) {
+        return null;
+    }
+
+    public void deleteSecurityRole(Long id) throws FortCrudException {
+
+    }
+
+    // ============= End: Security Role Crud ====================
 }
