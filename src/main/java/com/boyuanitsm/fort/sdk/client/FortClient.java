@@ -147,7 +147,7 @@ public class FortClient {
         if (content == null) {
             return null;
         }
-        return mapper.readValue(content, TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityGroup.class));
+        return mapper.readValue(content, SecurityUser.class);
     }
 
     String getCookieString() {
