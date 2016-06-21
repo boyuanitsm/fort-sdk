@@ -5,8 +5,7 @@ build_test:
     script:
         - mvn package
     stage: test
-    only:
-        - master
+
     except:
         - develop
     tags:
