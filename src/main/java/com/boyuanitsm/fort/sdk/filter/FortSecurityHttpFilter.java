@@ -165,15 +165,18 @@ public class FortSecurityHttpFilter implements Filter {
             Set<SecurityAuthority> userAuthorities = context.getAuthorities();
 
             boolean isAllow = false;
-            for (Long authorityId : authorityIdSet) {
-                for (SecurityAuthority userAuthority : userAuthorities) {
-                    if (authorityId.equals(userAuthority.getId())) {
-                        isAllow = true;
+
+            if (authorityIdSet != null) {
+                for (Long authorityId : authorityIdSet) {
+                    for (SecurityAuthority userAuthority : userAuthorities) {
+                        if (authorityId.equals(userAuthority.getId())) {
+                            isAllow = true;
+                            break;
+                        }
+                    }
+                    if (isAllow) {
                         break;
                     }
-                }
-                if (isAllow) {
-                    break;
                 }
             }
 
