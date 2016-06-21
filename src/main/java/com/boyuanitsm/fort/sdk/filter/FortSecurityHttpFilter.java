@@ -41,17 +41,24 @@ public class FortSecurityHttpFilter implements Filter {
     @Autowired
     private FortResourceCache cache;
 
-    private AuthenticationHandler handler = new AuthenticationHandler();
+    private String contextPath = null;
 
     public void init(FilterConfig filterConfig) throws ServletException {
         // on init
+    }
+
+    public void destroy() {
+        // on destroy
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        String contextPath = request.getContextPath();
+        if (contextPath == null) {
+            contextPath = request.getContextPath();
+        }
+
         String requestUri = request.getRequestURI();
 
         if (!contextPath.isEmpty()) {
@@ -62,132 +69,153 @@ public class FortSecurityHttpFilter implements Filter {
         log.debug("request uri: {}", requestUri);
 
         if (configuration.getLogin().getUrl().equals(requestUri)) {
-            handler.signIn(request, response);
+            signIn(request, response);
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
-            handler.logout(request, response);
+            logout(request, response);
         } else if (cache.getResourceId(requestUri) != null) {
             Long resourceId = cache.getResourceId(requestUri);
-            handler.authentication(request, response, chain, resourceId);
+            authentication(request, response, chain, resourceId);
         } else {
+            fortContext(request);
             chain.doFilter(request, response);
         }
     }
 
-    public void destroy() {
-        // on destroy
+    private void fortContext(HttpServletRequest request) {
+        String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+        FortContext context = cache.getFortContext(token);
+
+        if (context == null) {
+            anonymousFortContext();
+        } else {
+            FortContextHolder.setContext(context);
+        }
+    }
+
+    private void anonymousFortContext() {
+
     }
 
     /**
-     * Fort Authentication Handler.
+     * signIn handler. signIn is form parameter f_username. password is form parameter f_password.
      *
-     * @author zhanghua on 5/17/16.
+     * @param request  http servlet request
+     * @param response http servlet response
+     * @throws IOException
      */
-    private class AuthenticationHandler {
+    private void signIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
+        String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
+        try {
+            SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USER_AGENT));
+            // update logged user cache.
+            cache.updateLoggedUserCache(user);
+            // set cookie
+            response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
+            // signIn success, redirect to success return
+            sendRedirect(response, configuration.getLogin().getSuccessReturn());
+        } catch (FortAuthenticationException e) {
+            // signIn or password error, redirect to error return
+            sendRedirect(response, configuration.getLogin().getErrorReturn());
+        } catch (Exception e) {
+            log.error("signIn error", e);
+        }
+    }
 
-        /**
-         * signIn handler. signIn is form parameter f_username. password is form parameter f_password.
-         *
-         * @param request  http servlet request
-         * @param response http servlet response
-         * @throws IOException
-         */
-        private void signIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
-            String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
-            try {
-                SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USER_AGENT));
-                // update logged user cache.
-                cache.updateLoggedUserCache(user);
-                // set cookie
-                response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
-                // signIn success, redirect to success return
-                response.sendRedirect(configuration.getLogin().getSuccessReturn());
-            } catch (FortAuthenticationException e) {
-                // signIn or password error, redirect to error return
-                response.sendRedirect(configuration.getLogin().getErrorReturn());
-            } catch (Exception e) {
-                log.error("signIn error", e);
+    /**
+     * logout handler. remove cookie FORT_USER_TOKEN_COOKIE_NAME
+     *
+     * @param request  http servlet request
+     * @param response http servlet response
+     * @throws IOException
+     */
+    private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // clear cookie
+        response.addHeader("Set-Cookie", String.format("%s=; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME));
+        // token overdue
+        String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+        try {
+            client.logout(token);
+        } catch (FortCrudException e) {
+            log.warn("token overdue error! ", e);
+        }
+        sendRedirect(response, configuration.getLogout().getSuccessReturn());
+    }
+
+    /**
+     * Get cookie value from cookies
+     *
+     * @param cookies    the cookie array
+     * @param cookieName the name of the cookie
+     * @return cookie value
+     */
+    private String getCookieValue(Cookie[] cookies, String cookieName) {
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(cookieName)) {
+                return cookie.getValue();
             }
         }
+        return null;
+    }
 
-        /**
-         * logout handler. remove cookie FORT_USER_TOKEN_COOKIE_NAME
-         *
-         * @param request  http servlet request
-         * @param response http servlet response
-         * @throws IOException
-         */
-        private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            // clear cookie
-            response.addHeader("Set-Cookie", String.format("%s=; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME));
-            // token overdue
-            String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
-            try {
-                client.logout(token);
-            } catch (FortCrudException e) {
-                log.warn("token overdue error! ", e);
-            }
-            response.sendRedirect(configuration.getLogout().getSuccessReturn());
+    /**
+     * authentication access. if token is null. redirect to login view.
+     *
+     * @param request    the servlet request
+     * @param response   the servlet response
+     * @param chain      the filter chain
+     * @param resourceId the resource id
+     * @throws IOException
+     * @throws ServletException
+     */
+    private void authentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Long resourceId) throws IOException, ServletException {
+        String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+        FortContext context = cache.getFortContext(token);
+
+        if (context == null) {
+            // no logged, redirect to signIn view
+            sendRedirect(response, configuration.getLogin().getLoginView());
+            return;
         }
 
-        private String getCookieValue(Cookie[] cookies, String cookieName) {
-            for (Cookie cookie: cookies) {
-                if (cookie.getName().equals(cookieName)) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
-        }
+        // get this resource relation authorities
+        Set<Long> authorityIdSet = cache.getAuthorityIdSet(resourceId);
+        // get user authorities
+        Set<SecurityAuthority> userAuthorities = context.getAuthorities();
 
-        /**
-         * authentication access. if token is null. redirect to login view.
-         *
-         * @param request the servlet request
-         * @param response the servlet response
-         * @param chain the filter chain
-         * @param resourceId the resource id
-         * @throws IOException
-         * @throws ServletException
-         */
-        private void authentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Long resourceId) throws IOException, ServletException {
-            String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
-            FortContext context = cache.getFortContext(token);
+        boolean isAllow = false;
 
-            if (context == null) {
-                // no logged, redirect to signIn view
-                response.sendRedirect(configuration.getLogin().getLoginView());
-                return;
-            }
-
-            // get this resource relation authorities
-            Set<Long> authorityIdSet = cache.getAuthorityIdSet(resourceId);
-            // get user authorities
-            Set<SecurityAuthority> userAuthorities = context.getAuthorities();
-
-            boolean isAllow = false;
-
-            if (authorityIdSet != null) {
-                for (Long authorityId : authorityIdSet) {
-                    for (SecurityAuthority userAuthority : userAuthorities) {
-                        if (authorityId.equals(userAuthority.getId())) {
-                            isAllow = true;
-                            break;
-                        }
-                    }
-                    if (isAllow) {
+        if (authorityIdSet != null) {
+            for (Long authorityId : authorityIdSet) {
+                for (SecurityAuthority userAuthority : userAuthorities) {
+                    if (authorityId.equals(userAuthority.getId())) {
+                        isAllow = true;
                         break;
                     }
                 }
-            }
-
-            if (isAllow) {// ok
-                // set context
-                FortContextHolder.setContext(context);
-                // do filter
-                chain.doFilter(request, response);
-            } else {// un authorized
-                response.sendRedirect(configuration.getAuthentication().getUnauthorizedReturn());
+                if (isAllow) {
+                    break;
+                }
             }
         }
+
+        if (isAllow) {// ok
+            // set context
+            FortContextHolder.setContext(context);
+            // do filter
+            chain.doFilter(request, response);
+        } else {// un authorized
+            sendRedirect(response, configuration.getAuthentication().getUnauthorizedReturn());
+        }
+    }
+
+    /**
+     * Send redirect and add contextPath
+     *
+     * @param response the HTTP response
+     * @param s        redirect url
+     */
+    private void sendRedirect(HttpServletResponse response, String s) throws IOException {
+        response.sendRedirect(contextPath + s);
     }
 }
