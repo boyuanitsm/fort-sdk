@@ -8,6 +8,7 @@ import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortAuthenticationException;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +71,13 @@ public class FortSecurityHttpFilter implements Filter {
         log.debug("request uri: {}", requestUri);
 
         if (configuration.getLogin().getUrl().equals(requestUri)) {
+            log.debug("Start fort login...");
             signIn(request, response);
         } else if (configuration.getLogout().getUrl().equals(requestUri)) {
+            log.debug("Start fort logout...");
             logout(request, response);
         } else if (cache.getResourceId(requestUri) != null) {
+            log.debug("Start fort authentication...");
             Long resourceId = cache.getResourceId(requestUri);
             authentication(request, response, chain, resourceId);
         } else {
@@ -104,6 +108,12 @@ public class FortSecurityHttpFilter implements Filter {
      * @throws IOException
      */
     private void signIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            log.warn("Login method not allowed, please use POST method!");
+            response.setStatus(HttpStatus.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+
         String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
         String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
         try {
@@ -115,6 +125,7 @@ public class FortSecurityHttpFilter implements Filter {
             // signIn success, redirect to success return
             sendRedirect(response, configuration.getLogin().getSuccessReturn());
         } catch (FortAuthenticationException e) {
+            log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password);
             // signIn or password error, redirect to error return
             sendRedirect(response, configuration.getLogin().getErrorReturn());
         } catch (Exception e) {
@@ -139,6 +150,7 @@ public class FortSecurityHttpFilter implements Filter {
         } catch (FortCrudException e) {
             log.warn("token overdue error! ", e);
         }
+        log.debug("Logout success!");
         sendRedirect(response, configuration.getLogout().getSuccessReturn());
     }
 
@@ -173,6 +185,7 @@ public class FortSecurityHttpFilter implements Filter {
         FortContext context = cache.getFortContext(token);
 
         if (context == null) {
+            log.debug("Not logged in, redirect to login view.");
             // no logged, redirect to signIn view
             sendRedirect(response, configuration.getLogin().getLoginView());
             return;
@@ -197,14 +210,18 @@ public class FortSecurityHttpFilter implements Filter {
                     break;
                 }
             }
+        } else {
+            log.warn("This resource not have authority set! resourceId: {}", resourceId);
         }
 
         if (isAllow) {// ok
+            log.debug("Authentication OK.");
             // set context
             FortContextHolder.setContext(context);
             // do filter
             chain.doFilter(request, response);
         } else {// un authorized
+            log.warn("Access denied, redirect to unauthorized view.");
             sendRedirect(response, configuration.getAuthentication().getUnauthorizedReturn());
         }
     }
