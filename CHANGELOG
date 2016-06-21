@@ -1,5 +1,16 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.2.2
+
+    - 重定向时加入ContextPath
+    - 解决如果一个资源没有对应的权限，在访问这个资源时，会发生空指针异常
+    - 未加入权限控制的资源可以获得用户身份信息
+
+v 1.2.1
+
+    - 从此版本开始，使用Maven私服Nexus保存历史版本的jar包
+    - 修复了Http请求失败关闭连接时发生空指针异常的问题
+
 v 1.2.0
 
     - 使用Jackson替代Alibaba fastjson序列化json
