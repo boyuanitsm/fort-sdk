@@ -23,7 +23,8 @@ import java.util.Set;
 import static com.boyuanitsm.fort.sdk.config.Constants.*;
 
 /**
- * Fort Security Http Filter
+ * Fort Security Http Filter. Intercept request to achieve the purpose of access control.
+ * Login logout operations are handled by the filter.Configure the filter must be used in the spring agent.
  *
  * @author zhanghua on 5/17/16.
  */
@@ -81,19 +82,18 @@ public class FortSecurityHttpFilter implements Filter {
         }
     }
 
+    /**
+     * When the resources were not add access control set fort context.
+     *
+     * @param request the HTTP request
+     */
     private void fortContext(HttpServletRequest request) {
         String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
         FortContext context = cache.getFortContext(token);
 
-        if (context == null) {
-            anonymousFortContext();
-        } else {
+        if (context != null) {
             FortContextHolder.setContext(context);
         }
-    }
-
-    private void anonymousFortContext() {
-
     }
 
     /**
