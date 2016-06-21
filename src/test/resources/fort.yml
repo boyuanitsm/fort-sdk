@@ -12,11 +12,11 @@ fort:
     # 应用模块
     app:
         # fort server 的基础url
-        server-base: http://localhost:8080
+        server-base: http://172.16.8.21:9800
         # 应用 key
-        app-key: udyqxvfhywkb
+        app-key: zwecds24bjmm
         # 应用 secret
-        app-secret: 7ezx7psjvdoe
+        app-secret: b6yulgieomdu
     # 身份验证模块
     authentication:
         # 用户没有权限访问时，重定向的地址

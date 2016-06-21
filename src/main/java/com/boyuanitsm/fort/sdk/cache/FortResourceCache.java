@@ -411,7 +411,9 @@ public class FortResourceCache {
                 navCache.put(nav.getResource().getId(), nav);
             }
         } else if (DELETE.equals(option)) {
-            navCache.remove(nav.getResource().getId());
+            if (nav.getResource() != null) {
+                navCache.remove(nav.getResource().getId());
+            }
         }
     }
 
