@@ -186,6 +186,7 @@ public class FortSecurityHttpFilter implements Filter {
 
         if (context == null) {
             log.debug("Not logged in, redirect to login view.");
+            FortContextHolder.setContext(null);
             // no logged, redirect to signIn view
             sendRedirect(response, configuration.getLogin().getLoginView());
             return;
