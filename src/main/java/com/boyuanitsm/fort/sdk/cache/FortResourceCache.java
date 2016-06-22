@@ -109,7 +109,9 @@ public class FortResourceCache {
         // load navs
         List<SecurityNav> navs = fortClient.getAllSecurityNavs();
         for (SecurityNav nav : navs) {
-            navCache.put(nav.getResource().getId(), nav);
+            if (nav.getResource() != null) {
+                navCache.put(nav.getResource().getId(), nav);
+            }
         }
         // load authorities
         List<SecurityAuthority> authorities = fortClient.getAllAuthorities();
