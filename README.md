@@ -1,6 +1,6 @@
 ## Welcome to Fort SDK
 
-![Build Status](http://180.167.77.58:30000/fort/fort-sdk/badges/master/build.svg)
+![Build Status](http://172.16.8.21:20000/fort/fort-sdk/badges/master/build.svg)
 
 [Fort Docs](http://172.16.8.21:9801)
 
