@@ -37,7 +37,7 @@ public class SecurityHttpFilter implements Filter {
     private FortProperties fortProperties;
 
     @Autowired
-    private ManagerClient client;
+    private ManagerClient managerClient;
 
     @Autowired
     private ResourceManager cache;
@@ -116,11 +116,16 @@ public class SecurityHttpFilter implements Filter {
         String login = request.getParameter(LOGIN_FORM_USERNAME_PARAM_NAME);
         String password = request.getParameter(LOGIN_FORM_PASSWORD_PARAM_NAME);
         try {
-            SecurityUser user = client.signIn(login, password, request.getRemoteAddr(), request.getHeader(USER_AGENT));
+            SecurityUser user = managerClient.signIn(login, password, request.getRemoteAddr(), request.getHeader(USER_AGENT));
             // update logged user cache.
             cache.updateLoggedUserCache(user);
             // set cookie
-            response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
+            Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, user.getToken());
+            cookie.setDomain(fortProperties.getCookie().getDomain());
+            cookie.setMaxAge(fortProperties.getCookie().getMaxAge());
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
 
             // signIn success, redirect to success return
             String successReturn = request.getParameter(SUCCESS_RETURN);
@@ -157,15 +162,24 @@ public class SecurityHttpFilter implements Filter {
      */
     private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // clear cookie
-        response.addHeader("Set-Cookie", String.format("%s=; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME));
-        // token overdue
+        Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, "");
+        cookie.setDomain(fortProperties.getCookie().getDomain());
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+
+        // set token overdue
         String token = getCookieValue(request.getCookies(), FORT_USER_TOKEN_COOKIE_NAME);
+
         try {
-            client.logout(token);
+            managerClient.logout(token);
         } catch (FortCrudException e) {
             log.warn("token overdue error! ", e);
         }
+
         log.debug("Logout success!");
+
+        // logout success, redirect to success return
         String successReturn = request.getParameter(SUCCESS_RETURN);
         if (successReturn != null) {
             // have success_return param, return param value uri
