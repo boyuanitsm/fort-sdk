@@ -537,6 +537,10 @@ public class FortResourceCache {
                 log.error("Get user by token error! token: {}", token, e.getMessage());
                 return null;
             }
+        } else if (user.getTokenOverdueTime().before(new Date())){
+            // the token is overdue time
+            loggedUserCache.remove(token);
+            return null;
         }
 
         return getFortContext(user);
