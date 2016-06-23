@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.2.5
+
+    - 修复了当有导航栏没有选择资源时，会导致项目无法启动的严重bug
+
 v 1.2.4
 
     - 退出登录后清空FortContext
