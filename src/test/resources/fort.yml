@@ -25,9 +25,9 @@ fort:
         login:
             # 登录URL, 登录时发送POST请求到这个地址, 用户名的参数名为f_username, 密码的参数名为f_password
             url: /fort/login
-            # 登录成功时，重定向的地址
+            # 登录成功时，重定向的地址, 登录的时候可以发送success_return参数来临时改变这个地址
             success-return: /index.html
-            # 登录失败时，重定向的地址
+            # 登录失败时，重定向的地址, 登录的时候可以发送error_return参数来临时改变这个地址
             error-return: /login.html?error=1
             # 登录页面地址
             login-view: /login.html
@@ -35,7 +35,7 @@ fort:
         logout:
             # 登出URL
             url: /fort/logout
-            # 登出成功时，重定向的地址
+            # 登出成功时，重定向的地址, 登出的时候可以发送success_return参数来临时改变这个地址
             success-return: /index.html
     # 用户模块
     user:
@@ -43,3 +43,9 @@ fort:
         default-roles: ROLE_USER
         # 创建新用户时，用户所属组名，多个使用,隔开
         default-groups: WORK_GROUP
+    # Cookie 模块
+    cookie:
+        # cookie的域,可以使多个web服务器共享cookie,如果错误设置domain可能会导致fort失效!
+        domain: localhost
+        # cookie 有效期, 秒
+        max-age: 604800

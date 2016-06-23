@@ -19,6 +19,7 @@ public class FortConfiguration {
     private final App app;
     private final Authentication authentication;
     private final User user;
+    private final Cookie cookie;
 
     public FortConfiguration() throws IOException {
         Yaml yaml = new Yaml();
@@ -27,6 +28,7 @@ public class FortConfiguration {
         app = new App(conf.get("app"));
         authentication = new Authentication(conf.get("authentication"));
         user = new User(conf.get("user"));
+        cookie = new Cookie(conf.get("cookie"));
     }
 
     public class App {
@@ -168,6 +170,26 @@ public class FortConfiguration {
         }
     }
 
+    public class Cookie {
+        Cookie(Object cookie) {
+            Map<String, Object> cookieMap = (Map<String, Object>) cookie;
+
+            this.domain = String.valueOf(cookieMap.get("domain"));
+            this.maxAge = Integer.valueOf(String.valueOf(cookieMap.get("max-age")));
+        }
+
+        private final String domain;
+        private final int maxAge;
+
+        public String getDomain() {
+            return domain;
+        }
+
+        public int getMaxAge() {
+            return maxAge;
+        }
+    }
+
     public App getApp() {
         return app;
     }
@@ -186,5 +208,9 @@ public class FortConfiguration {
 
     public Authentication.Logout getLogout() {
         return authentication.logout;
+    }
+
+    public Cookie getCookie() {
+        return cookie;
     }
 }
