@@ -30,7 +30,7 @@ import java.io.IOException;
 public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @Autowired
-    private FortCrudClient crudClient;
+    private FortCrudClient fortCrudClient;
 
     @RequestMapping("/api/profile")
     FortContext product() {
@@ -39,16 +39,16 @@ public class FortSdkTest implements EmbeddedServletContainerCustomizer{
 
     @RequestMapping("/api/signup")
     void signup(SecurityUser user, HttpServletResponse response) throws FortCrudException, IOException {
-        user = crudClient.signUp(user);
+        user = fortCrudClient.signUp(user);
         System.out.println(user);
         response.sendRedirect("/login.html");
     }
 
     @RequestMapping("/api/update-group/{id}")
     void updateGroup(@PathVariable("id") Long id) throws FortCrudException, IOException {
-        SecurityGroup group = crudClient.getSecurityGroup(id);
+        SecurityGroup group = fortCrudClient.getSecurityGroup(id);
         group.setAllowDeleting(false);
-        crudClient.updateSecurityGroup(group);
+        fortCrudClient.updateSecurityGroup(group);
     }
 
     public static void main(String[] args) throws Exception {

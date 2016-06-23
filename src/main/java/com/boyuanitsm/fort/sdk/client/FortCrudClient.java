@@ -1,9 +1,9 @@
 package com.boyuanitsm.fort.sdk.client;
 
 import com.boyuanitsm.fort.sdk.bean.Pageable;
-import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
+import com.boyuanitsm.fort.sdk.ResourceManager;
 import com.boyuanitsm.fort.sdk.config.API;
-import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.config.FortProperties;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
@@ -33,11 +33,11 @@ public class FortCrudClient {
     private final Logger log = LoggerFactory.getLogger(FortCrudClient.class);
 
     @Autowired
-    private FortResourceCache cache;
+    private ResourceManager resourceManager;
     @Autowired
-    private FortConfiguration configuration;
+    private FortProperties fortProperties;
     @Autowired
-    private FortHttpClient fortHttpClient;
+    private HttpClient httpClient;
 
     private ObjectMapper mapper = ObjectMapperBuilder.build();
 
@@ -62,7 +62,7 @@ public class FortCrudClient {
         if (user.getPasswordHash() == null || user.getPasswordHash().isEmpty()) {
             throw new FortCrudException("user.passwordHash is can't be null!");
         }
-        return signUp(user, configuration.getUser().getDefaultRoles(), configuration.getUser().getDefaultGroups());
+        return signUp(user, fortProperties.getUser().getDefaultRoles(), fortProperties.getUser().getDefaultGroups());
     }
 
     /**
@@ -78,15 +78,15 @@ public class FortCrudClient {
     public SecurityUser signUp(SecurityUser user, String[] roles, String[] groups) throws FortCrudException, IOException {
         // set default role, group
         if (roles != null) {
-            user.setRoles(cache.getRolesByArrayNames(roles));
+            user.setRoles(resourceManager.getRolesByArrayNames(roles));
         }
         if (groups != null) {
-            user.setGroups(cache.getGroupsByArrayNames(groups));
+            user.setGroups(resourceManager.getGroupsByArrayNames(groups));
         }
         // activated
         user.setActivated(true);
 
-        String content = fortHttpClient.postJson(API.SECURITY_USERS, user);
+        String content = httpClient.postJson(API.SECURITY_USERS, user);
         return mapper.readValue(content, SecurityUser.class);
     }
 
@@ -102,7 +102,7 @@ public class FortCrudClient {
         if (pageable == null) {
             pageable = new Pageable();
         }
-        return mapper.readValue(fortHttpClient.get(API.SECURITY_USERS,
+        return mapper.readValue(httpClient.get(API.SECURITY_USERS,
                 new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
                 new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
                     TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityUser.class));
@@ -118,7 +118,7 @@ public class FortCrudClient {
      */
     public SecurityUser getSecurityUser(String login) throws FortCrudException, IOException {
         try {
-            String content = fortHttpClient.get(API.SECURITY_USER_BY_LOGIN + "/" + login);
+            String content = httpClient.get(API.SECURITY_USER_BY_LOGIN + "/" + login);
             return mapper.readValue(content, SecurityUser.class);
         } catch (FortCrudException e) {
             log.warn("Not found {} user.", login, e.getMessage());
@@ -137,7 +137,7 @@ public class FortCrudClient {
      * @throws IOException
      */
     public SecurityUser updateSecurityUser(SecurityUser securityUser) throws FortCrudException, IOException {
-        return mapper.readValue(fortHttpClient.putJson(API.SECURITY_USERS, securityUser), SecurityUser.class);
+        return mapper.readValue(httpClient.putJson(API.SECURITY_USERS, securityUser), SecurityUser.class);
     }
 
     /**
@@ -153,7 +153,7 @@ public class FortCrudClient {
             return;
         }
         user.setPasswordHash(newPassword);
-        fortHttpClient.putJson(API.SECURITY_USERS, user);
+        httpClient.putJson(API.SECURITY_USERS, user);
     }
 
     // ============= End: Security User Crud ====================
@@ -170,7 +170,7 @@ public class FortCrudClient {
      * @throws IOException
      */
     public SecurityGroup createSecurityGroup(SecurityGroup securityGroup) throws FortCrudException, IOException {
-        return mapper.readValue(fortHttpClient.postJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
+        return mapper.readValue(httpClient.postJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
     }
 
     /**
@@ -184,14 +184,14 @@ public class FortCrudClient {
      * @throws IOException
      */
     public SecurityGroup updateSecurityGroup(SecurityGroup securityGroup) throws FortCrudException, IOException {
-        return mapper.readValue(fortHttpClient.putJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
+        return mapper.readValue(httpClient.putJson(API.SECURITY_GROUPS, securityGroup), SecurityGroup.class);
     }
 
     /**
-     * Get all the securityGroups from cache.
+     * Get all the securityGroups from resourceManager.
      */
     public List<SecurityGroup> getAllSecurityGroup() {
-        Map<Long, SecurityGroup> groupMap = cache.getGroupCache();
+        Map<Long, SecurityGroup> groupMap = resourceManager.getGroupCache();
         List<SecurityGroup> groups = new ArrayList<SecurityGroup>();
         for (Long key : groupMap.keySet()) {
             groups.add(groupMap.get(key));
@@ -206,7 +206,7 @@ public class FortCrudClient {
      * @return the  securityGroup, or null (Not Found)
      */
     public SecurityGroup getSecurityGroup(Long id) {
-        return cache.getGroupCache().get(id);
+        return resourceManager.getGroupCache().get(id);
     }
 
     /**
@@ -215,7 +215,7 @@ public class FortCrudClient {
      * @param id the id of the securityGroup to delete
      */
     public void deleteSecurityGroup(Long id) throws FortCrudException {
-        fortHttpClient.delete(String.format("%s/%s", API.SECURITY_GROUPS, id));
+        httpClient.delete(String.format("%s/%s", API.SECURITY_GROUPS, id));
     }
 
     // ============= End: Security Group Crud ====================

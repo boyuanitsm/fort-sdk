@@ -1,8 +1,7 @@
-package com.boyuanitsm.fort.sdk.filter;
+package com.boyuanitsm.fort.sdk;
 
-import com.boyuanitsm.fort.sdk.cache.FortResourceCache;
-import com.boyuanitsm.fort.sdk.client.FortClient;
-import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.client.ManagerClient;
+import com.boyuanitsm.fort.sdk.config.FortProperties;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.context.FortContextHolder;
 import com.boyuanitsm.fort.sdk.domain.*;
@@ -30,18 +29,18 @@ import static com.boyuanitsm.fort.sdk.config.Constants.*;
  * @author zhanghua on 5/17/16.
  */
 @Component
-public class FortSecurityHttpFilter implements Filter {
+public class SecurityHttpFilter implements Filter {
 
-    private final Logger log = LoggerFactory.getLogger(FortSecurityHttpFilter.class);
-
-    @Autowired
-    private FortConfiguration configuration;
+    private final Logger log = LoggerFactory.getLogger(SecurityHttpFilter.class);
 
     @Autowired
-    private FortClient client;
+    private FortProperties fortProperties;
 
     @Autowired
-    private FortResourceCache cache;
+    private ManagerClient client;
+
+    @Autowired
+    private ResourceManager cache;
 
     private String contextPath = null;
 
@@ -70,10 +69,10 @@ public class FortSecurityHttpFilter implements Filter {
 
         log.debug("request uri: {}", requestUri);
 
-        if (configuration.getLogin().getUrl().equals(requestUri)) {
+        if (fortProperties.getLogin().getUrl().equals(requestUri)) {
             log.debug("Start fort login...");
             signIn(request, response);
-        } else if (configuration.getLogout().getUrl().equals(requestUri)) {
+        } else if (fortProperties.getLogout().getUrl().equals(requestUri)) {
             log.debug("Start fort logout...");
             logout(request, response);
         } else if (cache.getResourceId(requestUri) != null) {
@@ -130,7 +129,7 @@ public class FortSecurityHttpFilter implements Filter {
                 sendRedirect(response, successReturn);
             } else {
                 // not have success_return param, return config uri
-                sendRedirect(response, configuration.getLogin().getSuccessReturn());
+                sendRedirect(response, fortProperties.getLogin().getSuccessReturn());
             }
         } catch (FortAuthenticationException e) {
             log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password);
@@ -141,7 +140,7 @@ public class FortSecurityHttpFilter implements Filter {
                 sendRedirect(response, errorReturn);
             } else {
                 // not have error_return param, return config uri
-                sendRedirect(response, configuration.getLogin().getErrorReturn());
+                sendRedirect(response, fortProperties.getLogin().getErrorReturn());
             }
         } catch (Exception e) {
             log.error("signIn error", e);
@@ -173,7 +172,7 @@ public class FortSecurityHttpFilter implements Filter {
             sendRedirect(response, successReturn);
         } else {
             // not have success_return param, return config uri
-            sendRedirect(response, configuration.getLogout().getSuccessReturn());
+            sendRedirect(response, fortProperties.getLogout().getSuccessReturn());
         }
     }
 
@@ -214,7 +213,7 @@ public class FortSecurityHttpFilter implements Filter {
             log.debug("Not logged in, redirect to login view.");
             FortContextHolder.setContext(null);
             // no logged, redirect to signIn view
-            sendRedirect(response, configuration.getLogin().getLoginView());
+            sendRedirect(response, fortProperties.getLogin().getLoginView());
             return;
         }
 
@@ -249,7 +248,7 @@ public class FortSecurityHttpFilter implements Filter {
             chain.doFilter(request, response);
         } else {// un authorized
             log.warn("Access denied, redirect to unauthorized view.");
-            sendRedirect(response, configuration.getAuthentication().getUnauthorizedReturn());
+            sendRedirect(response, fortProperties.getAuthentication().getUnauthorizedReturn());
         }
     }
 

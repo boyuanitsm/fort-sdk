@@ -1,9 +1,9 @@
-package com.boyuanitsm.fort.sdk.cache;
+package com.boyuanitsm.fort.sdk;
 
 import com.boyuanitsm.fort.sdk.bean.OnUpdateSecurityResource;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceClass;
 import com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceOption;
-import com.boyuanitsm.fort.sdk.client.FortClient;
+import com.boyuanitsm.fort.sdk.client.ManagerClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
@@ -26,11 +26,11 @@ import static com.boyuanitsm.fort.sdk.bean.enumeration.OnUpdateSecurityResourceO
  * @author zhanghua on 5/17/16.
  */
 @Component
-public class FortResourceCache {
+public class ResourceManager {
 
-    private final Logger log = LoggerFactory.getLogger(FortResourceCache.class);
+    private final Logger log = LoggerFactory.getLogger(ResourceManager.class);
 
-    private FortClient fortClient;
+    private ManagerClient managerClient;
 
     /**
      * resource entity cache. SecurityResourceEntity.id - SecurityResourceEntity
@@ -69,9 +69,9 @@ public class FortResourceCache {
     private ObjectMapper mapper;
 
     @Autowired
-    public FortResourceCache(FortClient fortClient) throws FortCrudException, IOException {
+    public ResourceManager(ManagerClient managerClient) throws FortCrudException, IOException {
         mapper = ObjectMapperBuilder.build();
-        this.fortClient = fortClient;// autowired fort client
+        this.managerClient = managerClient;// autowired fort client
         load();// load resource
     }
 
@@ -101,31 +101,31 @@ public class FortResourceCache {
         initCache();
 
         // load resource entities
-        List<SecurityResourceEntity> resourceEntities = fortClient.getAllResourceEntities();
+        List<SecurityResourceEntity> resourceEntities = managerClient.getAllResourceEntities();
         for (SecurityResourceEntity resourceEntity : resourceEntities) {
             resourceEntityCache.put(resourceEntity.getId(), resourceEntity);
             resourceUrlIdMap.put(resourceEntity.getUrl(), resourceEntity.getId());
         }
         // load navs
-        List<SecurityNav> navs = fortClient.getAllSecurityNavs();
+        List<SecurityNav> navs = managerClient.getAllSecurityNavs();
         for (SecurityNav nav : navs) {
             if (nav.getResource() != null) {
                 navCache.put(nav.getResource().getId(), nav);
             }
         }
         // load authorities
-        List<SecurityAuthority> authorities = fortClient.getAllAuthorities();
+        List<SecurityAuthority> authorities = managerClient.getAllAuthorities();
         for (SecurityAuthority authority : authorities) {
             authorityCache.put(authority.getId(), authority);
             loadResourceAuthoritiesIdsMap(authority);
         }
         // load roles
-        List<SecurityRole> roles = fortClient.getAllRoles();
+        List<SecurityRole> roles = managerClient.getAllRoles();
         for (SecurityRole role : roles) {
             roleCache.put(role.getId(), role);
         }
         // load group
-        List<SecurityGroup> groups = fortClient.getAllGroups();
+        List<SecurityGroup> groups = managerClient.getAllGroups();
         for (SecurityGroup group : groups) {
             groupCache.put(group.getId(), group);
         }
@@ -520,7 +520,7 @@ public class FortResourceCache {
         if (user == null) {
             // get from fort server.
             try {
-                user = fortClient.getByUserToken(token);
+                user = managerClient.getByUserToken(token);
                 if (user == null) {
                     return null;
                 } else {

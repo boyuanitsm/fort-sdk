@@ -1,7 +1,7 @@
 package com.boyuanitsm.fort.sdk.client;
 
 import com.boyuanitsm.fort.sdk.config.Constants;
-import com.boyuanitsm.fort.sdk.config.FortConfiguration;
+import com.boyuanitsm.fort.sdk.config.FortProperties;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
 import com.boyuanitsm.fort.sdk.exception.FortNoValidException;
 import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
@@ -41,9 +41,9 @@ import java.util.List;
  * @author zhanghua on 5/16/16.
  */
 @Component
-public class FortHttpClient {
+public class HttpClient {
 
-    private final Logger log = LoggerFactory.getLogger(FortHttpClient.class);
+    private final Logger log = LoggerFactory.getLogger(HttpClient.class);
 
     private String baseUrl;
 
@@ -55,9 +55,9 @@ public class FortHttpClient {
     private ObjectMapper mapper;
 
     @Autowired
-    FortHttpClient(FortConfiguration configuration) {
+    HttpClient(FortProperties fortProperties) {
         mapper = ObjectMapperBuilder.build();
-        this.baseUrl = configuration.getApp().getServerBase();
+        this.baseUrl = fortProperties.getApp().getServerBase();
         httpClient = HttpClients.createDefault();
         context = HttpClientContext.create();
         cookieStore = new BasicCookieStore();

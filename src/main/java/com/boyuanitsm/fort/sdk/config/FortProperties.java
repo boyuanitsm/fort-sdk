@@ -14,16 +14,16 @@ import java.util.Map;
  */
 @Component
 @SuppressWarnings(value = {"unchecked"})
-public class FortConfiguration {
+public class FortProperties {
 
     private final App app;
     private final Authentication authentication;
     private final User user;
     private final Cookie cookie;
 
-    public FortConfiguration() throws IOException {
+    public FortProperties() throws IOException {
         Yaml yaml = new Yaml();
-        InputStream is = FortConfiguration.class.getClassLoader().getResourceAsStream("fort.yml");
+        InputStream is = FortProperties.class.getClassLoader().getResourceAsStream("fort.yml");
         Map<String, Object> conf = ((Map<String, Map<String, Object>>) yaml.load(is)).get("fort");
         app = new App(conf.get("app"));
         authentication = new Authentication(conf.get("authentication"));
