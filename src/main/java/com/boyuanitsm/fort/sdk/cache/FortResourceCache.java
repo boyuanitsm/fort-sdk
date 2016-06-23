@@ -79,14 +79,14 @@ public class FortResourceCache {
      * init cache. new HashMap.
      */
     private void initCache() {
-        resourceEntityCache = new HashMap<Long, SecurityResourceEntity>();
-        resourceUrlIdMap = new HashMap<String, Long>();
-        navCache = new HashMap<Long, SecurityNav>();
-        authorityCache = new HashMap<Long, SecurityAuthority>();
-        roleCache = new HashMap<Long, SecurityRole>();
-        groupCache = new HashMap<Long, SecurityGroup>();
-        loggedUserCache = new HashMap<String, SecurityUser>();
-        resourceAuthoritiesMap = new HashMap<Long, Set<Long>>();
+        resourceEntityCache = new HashMap<>();
+        resourceUrlIdMap = new HashMap<>();
+        navCache = new HashMap<>();
+        authorityCache = new HashMap<>();
+        roleCache = new HashMap<>();
+        groupCache = new HashMap<>();
+        loggedUserCache = new HashMap<>();
+        resourceAuthoritiesMap = new HashMap<>();
     }
 
     /**
@@ -142,7 +142,7 @@ public class FortResourceCache {
         for (SecurityResourceEntity resourceEntity: authority.getResources()) {
             Set<Long> authorities = resourceAuthoritiesMap.get(resourceEntity.getId());
             if (authorities == null) {
-                authorities = new HashSet<Long>();
+                authorities = new HashSet<>();
                 resourceAuthoritiesMap.put(resourceEntity.getId(), authorities);
             }
             authorities.add(authority.getId());
@@ -160,15 +160,12 @@ public class FortResourceCache {
      * @return if not found return null
      */
     public SecurityRole getSecurityRoleByName(String name) {
-        Iterator<Long> keys = roleCache.keySet().iterator();
-
-        while (keys.hasNext()) {
-            SecurityRole role = roleCache.get(keys.next());
+        for (Long key: roleCache.keySet()) {
+            SecurityRole role = roleCache.get(key);
             if (role.getName().equals(name)) {
                 return role;
             }
         }
-
         return null;
     }
 
@@ -179,15 +176,12 @@ public class FortResourceCache {
      * @return if not found return null
      */
     public SecurityGroup getSecurityGroupByName(String name) {
-        Iterator<Long> keys = groupCache.keySet().iterator();
-
-        while (keys.hasNext()) {
-            SecurityGroup group = groupCache.get(keys.next());
+        for (Long key: groupCache.keySet()) {
+            SecurityGroup group = groupCache.get(key);
             if (group.getName().equals(name)) {
                 return group;
             }
         }
-
         return null;
     }
 
@@ -249,8 +243,8 @@ public class FortResourceCache {
         for (Long key : keys) {
             SecurityRole role = roleCache.get(key);
 
-            for (int i = 0; i < roleNames.length; i++) {
-                if (role.getName().equals(roleNames[i])) {
+            for (String roleName: roleNames) {
+                if (role.getName().equals(roleName)) {
                     roles.add(role);
                 }
             }
@@ -267,8 +261,8 @@ public class FortResourceCache {
         for (Long key : keys) {
             SecurityGroup group = groupCache.get(key);
 
-            for (int i = 0; i < groupNames.length; i++) {
-                if (group.getName().equals(groupNames[i])) {
+            for (String groupName: groupNames) {
+                if (group.getName().equals(groupName)) {
                     groups.add(group);
                 }
             }
