@@ -429,9 +429,19 @@ public class FortResourceCache {
         SecurityResourceEntity resource = mapper.readValue(mapper.writeValueAsString(onUpdateSecurityResource.getData()), SecurityResourceEntity.class);
 
         if (POST.equals(option) || PUT.equals(option)) {
+            // update resource entity cache
             resourceEntityCache.put(resource.getId(), resource);
+
+            // update resource url cache
             removeResourceUrlIdMapById(resource.getId());
             resourceUrlIdMap.put(resource.getUrl(), resource.getId());
+
+            // update nav cache
+            SecurityNav nav = navCache.get(resource.getId());
+            if (nav != null) {
+                nav.setResource(resource);
+                navCache.put(resource.getId(), nav);
+            }
         } else if (DELETE.equals(option)) {
             resourceEntityCache.remove(resource.getId());
             removeResourceUrlIdMapById(resource.getId());
