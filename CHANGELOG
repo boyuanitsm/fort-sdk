@@ -1,5 +1,13 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.3.0
+
+    - 修复了资源更新时, 对应导航栏的资源没有及时更新的问题
+    - 修复token已过期却还可以继续使用的问题
+    - 登录, 登出可以传递参数临时改变成功或失败的重定向地址
+    - 重命名了一些文件名, 目录结构变更, 源码更易读
+    - 在fort.yml中增加cookie模块, 可以设置cookie的domain和max-age
+
 v 1.2.5
 
     - 修复了当有导航栏没有选择资源时，会导致项目无法启动的严重bug
