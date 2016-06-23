@@ -122,14 +122,30 @@ public class FortSecurityHttpFilter implements Filter {
             cache.updateLoggedUserCache(user);
             // set cookie
             response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly", FORT_USER_TOKEN_COOKIE_NAME, user.getToken()));
+
             // signIn success, redirect to success return
-            sendRedirect(response, configuration.getLogin().getSuccessReturn());
+            String successReturn = request.getParameter(SUCCESS_RETURN);
+            if (successReturn != null) {
+                // have success_return param, return param value uri
+                sendRedirect(response, successReturn);
+            } else {
+                // not have success_return param, return config uri
+                sendRedirect(response, configuration.getLogin().getSuccessReturn());
+            }
         } catch (FortAuthenticationException e) {
             log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password);
             // signIn or password error, redirect to error return
-            sendRedirect(response, configuration.getLogin().getErrorReturn());
+            String errorReturn = request.getParameter(ERROR_RETURN);
+            if (errorReturn != null) {
+                // have error_return param, return param value uri
+                sendRedirect(response, errorReturn);
+            } else {
+                // not have error_return param, return config uri
+                sendRedirect(response, configuration.getLogin().getErrorReturn());
+            }
         } catch (Exception e) {
             log.error("signIn error", e);
+            response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -151,7 +167,14 @@ public class FortSecurityHttpFilter implements Filter {
             log.warn("token overdue error! ", e);
         }
         log.debug("Logout success!");
-        sendRedirect(response, configuration.getLogout().getSuccessReturn());
+        String successReturn = request.getParameter(SUCCESS_RETURN);
+        if (successReturn != null) {
+            // have success_return param, return param value uri
+            sendRedirect(response, successReturn);
+        } else {
+            // not have success_return param, return config uri
+            sendRedirect(response, configuration.getLogout().getSuccessReturn());
+        }
     }
 
     /**
