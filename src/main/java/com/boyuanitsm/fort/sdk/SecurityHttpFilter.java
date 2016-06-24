@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.PatternMatchUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
@@ -59,12 +60,16 @@ public class SecurityHttpFilter implements Filter {
         if (contextPath == null) {
             contextPath = request.getContextPath();
         }
-
         String requestUri = request.getRequestURI();
-
         if (!contextPath.isEmpty()) {
             // fix context path
             requestUri = requestUri.replace(contextPath, "");
+        }
+
+        if (isIgnore(requestUri)) {
+            // ignore this resource, do filter
+            chain.doFilter(request, response);
+            return;
         }
 
         log.debug("request uri: {}", requestUri);
@@ -274,5 +279,9 @@ public class SecurityHttpFilter implements Filter {
      */
     private void sendRedirect(HttpServletResponse response, String s) throws IOException {
         response.sendRedirect(contextPath + s);
+    }
+
+    private boolean isIgnore(String uri) {
+        return PatternMatchUtils.simpleMatch(fortProperties.getIgnores(), uri);
     }
 }

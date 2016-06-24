@@ -53,8 +53,8 @@ fort:
         max-age: 7
     # 不需要过滤的资源
     ignores:
-        - /**/*.jpg
-        - /**/*.png
-        - /**/*.gif
-        - /**/*.css
-        - /**/*.js
+        - /*/*.jpg
+        - /*/*.png
+        - /*/*.gif
+        - /*/*.css
+        - /*/*.js
