@@ -39,13 +39,22 @@ fort:
             success-return: /index.html
     # 用户模块
     user:
-        # 创建新用户时，用户拥有的角色名，多个使用,隔开
-        default-roles: ROLE_USER
-        # 创建新用户时，用户所属组名，多个使用,隔开
-        default-groups: WORK_GROUP
+        # 创建新用户时，用户拥有的角色名
+        default-roles:
+            - ROLE_USER
+        # 创建新用户时，用户所属组名
+        default-groups:
+            - WORK_GROUP
     # Cookie 模块
     cookie:
         # cookie的域,可以使多个web服务器共享cookie,如果错误设置domain可能会导致fort失效!
         domain: localhost
-        # cookie 有效期, 秒
-        max-age: 604800
+        # cookie 有效期, 天, 应与应用的会话时间相同
+        max-age: 7
+    # 不需要过滤的资源
+    ignores:
+        - /**/*.jpg
+        - /**/*.png
+        - /**/*.gif
+        - /**/*.css
+        - /**/*.js

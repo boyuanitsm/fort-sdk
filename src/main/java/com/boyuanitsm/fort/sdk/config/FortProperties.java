@@ -5,6 +5,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -20,18 +21,26 @@ public class FortProperties {
     private final Authentication authentication;
     private final User user;
     private final Cookie cookie;
+    private final String[] ignores;
 
     public FortProperties() throws IOException {
         Yaml yaml = new Yaml();
         InputStream is = FortProperties.class.getClassLoader().getResourceAsStream("fort.yml");
         Map<String, Object> conf = ((Map<String, Map<String, Object>>) yaml.load(is)).get("fort");
+
         app = new App(conf.get("app"));
         authentication = new Authentication(conf.get("authentication"));
         user = new User(conf.get("user"));
         cookie = new Cookie(conf.get("cookie"));
+
+        ArrayList<Object> ignoreList = (ArrayList<Object>) conf.get("ignores");
+        ignores = new String[ignoreList.size()];
+        for (int i = 0; i < ignoreList.size(); i++) {
+            ignores[i] = String.valueOf(ignoreList.get(i));
+        }
     }
 
-    public class App {
+    public static class App {
         App(Object app) {
             Map<String, String> appMap = (Map<String, String>) app;
             this.serverBase = appMap.get("server-base");
@@ -73,7 +82,7 @@ public class FortProperties {
         }
     }
 
-    public class Authentication {
+    public static class Authentication {
         Authentication(Object authentication) {
             Map<String, Object> authenticationMap = (Map<String, Object>) authentication;
             this.unauthorizedReturn = String.valueOf(authenticationMap.get("unauthorized-return"));
@@ -85,7 +94,7 @@ public class FortProperties {
         private final Login login;
         private final Logout logout;
 
-        public class Login {
+        public static class Login {
             Login(Object login) {
                 Map<String, String> loginMap = (Map<String, String>) login;
                 this.url = loginMap.get("url");
@@ -116,7 +125,7 @@ public class FortProperties {
             }
         }
 
-        public class Logout {
+        public static class Logout {
             Logout(Object logout) {
                 Map<String, String> loginMap = (Map<String, String>) logout;
                 this.url = loginMap.get("url");
@@ -148,14 +157,22 @@ public class FortProperties {
         }
     }
 
-    public class User {
+    public static class User {
         User(Object user) {
-            Map<String, String> userMap = (Map<String, String>) user;
-            String defaultRoles = userMap.get("default-roles");
-            String defaultGroups = userMap.get("default-groups");
+            Map<String, ArrayList<Object>> userMap = (Map<String, ArrayList<Object>>) user;
+            ArrayList<Object> defaultRoles = userMap.get("default-roles");
+            ArrayList<Object> defaultGroups = userMap.get("default-groups");
 
-            this.defaultRoles = defaultRoles.split(",");
-            this.defaultGroups = defaultGroups.split(",");
+            this.defaultRoles = new String[defaultRoles.size()];
+            this.defaultGroups = new String[defaultGroups.size()];
+
+            for (int i = 0; i < defaultRoles.size(); i++) {
+                this.defaultRoles[i] = String.valueOf(defaultRoles.get(i));
+            }
+
+            for (int i = 0; i < defaultGroups.size(); i++) {
+                this.defaultGroups[i] = String.valueOf(defaultGroups.get(i));
+            }
         }
 
         private final String[] defaultRoles;
@@ -170,12 +187,13 @@ public class FortProperties {
         }
     }
 
-    public class Cookie {
+    public static class Cookie {
         Cookie(Object cookie) {
             Map<String, Object> cookieMap = (Map<String, Object>) cookie;
 
             this.domain = String.valueOf(cookieMap.get("domain"));
-            this.maxAge = Integer.valueOf(String.valueOf(cookieMap.get("max-age")));
+            // max-age unit day transform second
+            this.maxAge = Integer.valueOf(String.valueOf(cookieMap.get("max-age"))) * (60 * 60 * 24);
         }
 
         private final String domain;
@@ -212,5 +230,9 @@ public class FortProperties {
 
     public Cookie getCookie() {
         return cookie;
+    }
+
+    public String[] getIgnores() {
+        return ignores;
     }
 }
