@@ -193,7 +193,7 @@ public class FortProperties {
 
             this.domain = String.valueOf(cookieMap.get("domain"));
             // max-age unit day transform second
-            this.maxAge = Integer.valueOf(String.valueOf(cookieMap.get("max-age"))) * (60 * 60 * 24);
+            this.maxAge = (int) (Float.valueOf(String.valueOf(cookieMap.get("max-age"))) * (60 * 60 * 24));
         }
 
         private final String domain;
