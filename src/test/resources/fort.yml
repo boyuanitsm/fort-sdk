@@ -17,6 +17,10 @@ fort:
         app-key: zwecds24bjmm
         # 应用 secret
         app-secret: b6yulgieomdu
+    # 资源同步服务
+    resource-sync:
+        # 是否启用
+        enable: true
     # 身份验证模块
     authentication:
         # 用户没有权限访问时，重定向的地址

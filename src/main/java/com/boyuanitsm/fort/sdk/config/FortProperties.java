@@ -18,6 +18,7 @@ import java.util.Map;
 public class FortProperties {
 
     private final App app;
+    private final ResourceSync resourceSync;
     private final Authentication authentication;
     private final User user;
     private final Cookie cookie;
@@ -29,6 +30,7 @@ public class FortProperties {
         Map<String, Object> conf = ((Map<String, Map<String, Object>>) yaml.load(is)).get("fort");
 
         app = new App(conf.get("app"));
+        resourceSync = new ResourceSync(conf.get("resource-sync"));
         authentication = new Authentication(conf.get("authentication"));
         user = new User(conf.get("user"));
         cookie = new Cookie(conf.get("cookie"));
@@ -79,6 +81,19 @@ public class FortProperties {
                     ", appKey='" + appKey + '\'' +
                     ", appSecret='" + appSecret + '\'' +
                     '}';
+        }
+    }
+
+    public static class ResourceSync {
+        ResourceSync(Object resourceSync) {
+            Map<String, Object> resourceSyncMap = (Map<String, Object>) resourceSync;
+            this.enable = Boolean.valueOf(String.valueOf(resourceSyncMap.get("enable")));
+        }
+
+        private final boolean enable;
+
+        public boolean isEnable() {
+            return enable;
         }
     }
 
@@ -210,6 +225,10 @@ public class FortProperties {
 
     public App getApp() {
         return app;
+    }
+
+    public ResourceSync getResourceSync() {
+        return resourceSync;
     }
 
     public User getUser() {

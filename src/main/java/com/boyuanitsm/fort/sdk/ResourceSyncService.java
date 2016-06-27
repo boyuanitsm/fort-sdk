@@ -46,7 +46,12 @@ public class ResourceSyncService {
         mapper = ObjectMapperBuilder.build();
         this.fortProperties = fortProperties;
         this.client = client;
-        connect();
+
+        if (fortProperties.getResourceSync().isEnable()) {
+            connect();
+        } else {
+            log.warn("Disabled fort resource synchronize service!");
+        }
     }
 
     /**
