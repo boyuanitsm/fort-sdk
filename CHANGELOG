@@ -2,11 +2,11 @@ Please view this file on the master branch, on stable branches it's out of date.
 
 v 1.4.0
 
-- 重构部分fort.yml
-    - fort.user.default-roles 改为YAML数组配置, 不再使用逗号分割
-    - fort.user.default-groups 改为YAML数组配置, 不再使用逗号分割
-    - fort.cookie.max-age 单位从秒改为天, 与后台保持一致
-- 增加可以配置不需要过滤的资源, 例如静态资源等
+    - 重构部分fort.yml
+        - fort.user.default-roles 改为YAML数组配置, 不再使用逗号分割
+        - fort.user.default-groups 改为YAML数组配置, 不再使用逗号分割
+        - fort.cookie.max-age 单位从秒改为天, 与后台保持一致
+    - 增加可以配置不需要过滤的资源, 例如静态资源等
 
 v 1.3.0
 
