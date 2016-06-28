@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A fort crud client. support all crud of the fort server.
@@ -68,8 +66,8 @@ public class FortCrudClient {
     /**
      * Register a new user, using given roles and groups
      *
-     * @param user security user, login, passwordHash required
-     * @param roles the user roles
+     * @param user   security user, login, passwordHash required
+     * @param roles  the user roles
      * @param groups the user groups
      * @return new user
      * @throws FortCrudException
@@ -99,13 +97,10 @@ public class FortCrudClient {
      * @throws IOException
      */
     public List<SecurityUser> getAllSecurityUser(Pageable pageable) throws FortCrudException, IOException {
-        if (pageable == null) {
-            pageable = new Pageable();
-        }
         return mapper.readValue(httpClient.get(API.SECURITY_USERS,
                 new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
                 new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
-                    TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityUser.class));
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityUser.class));
     }
 
     /**
@@ -118,7 +113,7 @@ public class FortCrudClient {
      */
     public SecurityUser getSecurityUser(String login) throws FortCrudException, IOException {
         try {
-            String content = httpClient.get(API.SECURITY_USER_BY_LOGIN + "/" + login);
+            String content = httpClient.get(String.format("%s/%s", API.SECURITY_USER_BY_LOGIN, login));
             return mapper.readValue(content, SecurityUser.class);
         } catch (FortCrudException e) {
             log.warn("Not found {} user.", login, e.getMessage());
@@ -180,7 +175,7 @@ public class FortCrudClient {
      * @return the ResponseEntity with status 200 (OK) and with body the updated securityGroup,
      * or throw {@link FortNoValidException}  if the securityGroup is not valid,
      * or throw {@link FortCrudException} (Internal Server Error) if the securityGroup couldnt be updated
-     * @throws FortCrudException if the Location URI syntax is incorrect
+     * @throws FortCrudException
      * @throws IOException
      */
     public SecurityGroup updateSecurityGroup(SecurityGroup securityGroup) throws FortCrudException, IOException {
@@ -188,25 +183,28 @@ public class FortCrudClient {
     }
 
     /**
-     * Get all the securityGroups from resourceManager.
+     * GET  /security-groups : get all the securityGroups.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityGroups in body
+     * @throws FortCrudException
+     * @throws IOException
      */
-    public List<SecurityGroup> getAllSecurityGroup() {
-        Map<Long, SecurityGroup> groupMap = resourceManager.getGroupCache();
-        List<SecurityGroup> groups = new ArrayList<SecurityGroup>();
-        for (Long key : groupMap.keySet()) {
-            groups.add(groupMap.get(key));
-        }
-        return groups;
+    public List<SecurityGroup> getAllSecurityGroup(Pageable pageable) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(API.SECURITY_GROUPS,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityGroup.class));
     }
 
     /**
-     * Get the "id" securityGroup
+     * GET  /security-groups/:id :  the "id" securityGroup
      *
      * @param id the id of the securityGroup to retrieve
      * @return the  securityGroup, or null (Not Found)
      */
-    public SecurityGroup getSecurityGroup(Long id) {
-        return resourceManager.getGroupCache().get(id);
+    public SecurityGroup getSecurityGroup(Long id) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(String.format("%s/%s", API.SECURITY_GROUPS, id)), SecurityGroup.class);
     }
 
     /**
@@ -222,96 +220,260 @@ public class FortCrudClient {
 
     // ============= Start: Security Resource Entity Crud ====================
 
+    /**
+     * POST  /security-resource-entities : Create a new securityResourceEntity.
+     *
+     * @param securityResourceEntity the securityResourceEntity to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new securityResourceEntity, or with throw {@link FortNoValidException}
+     * 400 (Bad Request) if the securityResourceEntity has already an ID
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityResourceEntity createSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.postJson(API.SECURITY_RESOURCE_ENTITIES, securityResourceEntity), SecurityResourceEntity.class);
     }
 
+    /**
+     * PUT  /security-resource-entities : Updates an existing securityGroup.
+     *
+     * @param securityResourceEntity the securityResourceEntity to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityResourceEntity,
+     * or throw {@link FortNoValidException}  if the securityResourceEntity is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityResourceEntity couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityResourceEntity updateSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.putJson(API.SECURITY_RESOURCE_ENTITIES, securityResourceEntity), SecurityResourceEntity.class);
     }
 
-    public List<SecurityResourceEntity> getAllSecurityResourceEntity(SecurityResourceEntity securityResourceEntity) {
-        return null;
+    /**
+     * GET  /security-resource-entities : get all the securityResourceEntities.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityResourceEntities in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityResourceEntity> getAllSecurityResourceEntity(Pageable pageable) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(API.SECURITY_RESOURCE_ENTITIES,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityResourceEntity.class));
     }
 
+    /**
+     * GET  /security-resource-entities/:id : get the "id" securityResourceEntity.
+     *
+     * @param id the id of the securityResourceEntity to retrieve
+     * @return the  securityGroup, or null (Not Found)
+     */
     public SecurityResourceEntity getSecurityResourceEntity(Long id) {
-        return null;
+        return resourceManager.getResourceEntity(id);
     }
 
+    /**
+     * DELETE  /security-resource-entities/:id : delete the "id" securityResourceEntity.
+     *
+     * @param id the id of the securityResourceEntity to delete
+     */
     public void deleteSecurityResourceEntity(Long id) throws FortCrudException {
-
+        httpClient.delete(String.format("%s/%s", API.SECURITY_RESOURCE_ENTITIES, id));
     }
 
     // ============= End: Security Resource Entity Crud ====================
 
     // ============= Start: Security Nav Crud ====================
 
+    /**
+     * POST  /security-navs : Create a new securityNav.
+     *
+     * @param securityNav the securityNav to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new securityNav, or with throw {@link FortNoValidException}
+     * 400 (Bad Request) if the securityNav has already an ID
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityNav createSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.postJson(API.SECURITY_NAVS, securityNav), SecurityNav.class);
     }
 
+    /**
+     * PUT  /security-navs : Updates an existing securityNav.
+     *
+     * @param securityNav the securityNav to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityNav,
+     * or throw {@link FortNoValidException}  if the securityNav is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityNav couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityNav updateSecurityNav(SecurityNav securityNav) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.putJson(API.SECURITY_NAVS, securityNav), SecurityNav.class);
     }
 
-    public List<SecurityNav> getAllSecurityNav(SecurityNav securityNav) {
-        return null;
+    /**
+     * GET  /security-navs : get all the securityNavs.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityNavs in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityNav> getAllSecurityNav(Pageable pageable) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(API.SECURITY_NAVS,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityNav.class));
     }
 
-    public SecurityNav getSecurityNav(Long id) {
-        return null;
+    /**
+     * GET  /security-navs/:id : get the "id" securityNav.
+     *
+     * @param id the id of the securityNav to retrieve
+     * @return the  securityNav, or null (Not Found)
+     */
+    public SecurityNav getSecurityNav(Long id) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(String.format("%s/%s", API.SECURITY_NAVS, id)), SecurityNav.class);
     }
 
+    /**
+     * DELETE  /security-navs/:id : delete the "id" securityNav.
+     *
+     * @param id the id of the securityNav to delete
+     */
     public void deleteSecurityNav(Long id) throws FortCrudException {
-
+        httpClient.delete(String.format("%s/%s", API.SECURITY_NAVS, id));
     }
 
     // ============= End: Security Nav Crud ====================
 
     // ============= Start: Security Authority Crud ====================
 
+    /**
+     * POST  /security-authorities : Create a new securityNav.
+     *
+     * @param securityAuthority the securityAuthority to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new securityAuthority, or with throw {@link FortNoValidException}
+     * 400 (Bad Request) if the securityAuthority has already an ID
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityAuthority createSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.postJson(API.SECURITY_AUTHORITIES, securityAuthority), SecurityAuthority.class);
     }
 
+    /**
+     * PUT  /security-authorities : Updates an existing securityAuthority.
+     *
+     * @param securityAuthority the securityAuthority to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityAuthority,
+     * or throw {@link FortNoValidException}  if the securityAuthority is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityAuthority couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityAuthority updateSecurityAuthority(SecurityAuthority securityAuthority) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.putJson(API.SECURITY_AUTHORITIES, securityAuthority), SecurityAuthority.class);
     }
 
-    public List<SecurityAuthority> getAllSecurityAuthority(SecurityAuthority securityAuthority) {
-        return null;
+    /**
+     * GET  /security-authorities : get all the securityAuthority.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityAuthority in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityAuthority> getAllSecurityAuthority(Pageable pageable) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(API.SECURITY_AUTHORITIES,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityAuthority.class));
     }
 
-    public SecurityAuthority getSecurityAuthority(Long id) {
-        return null;
+    /**
+     * GET  /security-authorities/:id : get the "id" securityAuthority.
+     *
+     * @param id the id of the securityAuthority to retrieve
+     * @return the  securityAuthority, or null (Not Found)
+     */
+    public SecurityAuthority getSecurityAuthority(Long id) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(String.format("%s/%s", API.SECURITY_AUTHORITIES, id)), SecurityAuthority.class);
     }
 
+    /**
+     * DELETE  /security-authorities/:id : delete the "id" securityAuthority.
+     *
+     * @param id the id of the securityAuthority to delete
+     */
     public void deleteSecurityAuthority(Long id) throws FortCrudException {
-
+        httpClient.delete(String.format("%s/%s", API.SECURITY_AUTHORITIES, id));
     }
 
     // ============= End: Security Authority Crud ====================
 
     // ============= Start: Security Role Crud ====================
 
+    /**
+     * POST  /security-roles : Create a new securityRole.
+     *
+     * @param securityRole the securityRole to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new securityRole, or with throw {@link FortNoValidException}
+     * 400 (Bad Request) if the securityRole has already an ID
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityRole createSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.postJson(API.SECURITY_ROLES, securityRole), SecurityRole.class);
     }
 
+    /**
+     * PUT  /security-authorities : Updates an existing securityRole.
+     *
+     * @param securityRole the securityRole to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated securityRole,
+     * or throw {@link FortNoValidException}  if the securityRole is not valid,
+     * or throw {@link FortCrudException} (Internal Server Error) if the securityRole couldnt be updated
+     * @throws FortCrudException
+     * @throws IOException
+     */
     public SecurityRole updateSecurityRole(SecurityRole securityRole) throws FortCrudException, IOException {
-        return null;
+        return mapper.readValue(httpClient.putJson(API.SECURITY_ROLES, securityRole), SecurityRole.class);
     }
 
-    public List<SecurityRole> getAllSecurityRole(SecurityRole securityRole) {
-        return null;
+    /**
+     * GET  /security-roles : get all the securityRole.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of securityRole in body
+     * @throws FortCrudException
+     * @throws IOException
+     */
+    public List<SecurityRole> getAllSecurityRole(Pageable pageable) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(API.SECURITY_ROLES,
+                new BasicNameValuePair("page", String.valueOf(pageable.getPage())),
+                new BasicNameValuePair("size", String.valueOf(pageable.getSize()))),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, SecurityRole.class));
     }
 
-    public SecurityRole getSecurityRole(Long id) {
-        return null;
+    /**
+     * GET  /security-roles/:id : get the "id" securityRole.
+     *
+     * @param id the id of the securityRole to retrieve
+     * @return the  securityRole, or null (Not Found)
+     */
+    public SecurityRole getSecurityRole(Long id) throws FortCrudException, IOException {
+        return mapper.readValue(httpClient.get(String.format("%s/%s", API.SECURITY_ROLES, id)), SecurityRole.class);
     }
 
+    /**
+     * DELETE  /security-roles/:id : delete the "id" securityRole.
+     *
+     * @param id the id of the securityRole to delete
+     */
     public void deleteSecurityRole(Long id) throws FortCrudException {
-
+        httpClient.delete(String.format("%s/%s", API.SECURITY_ROLES, id));
     }
 
     // ============= End: Security Role Crud ====================
