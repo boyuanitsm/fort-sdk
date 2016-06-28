@@ -267,9 +267,12 @@ public class FortCrudClient {
      *
      * @param id the id of the securityResourceEntity to retrieve
      * @return the  securityGroup, or null (Not Found)
+     * @throws FortCrudException
+     * @throws IOException
      */
-    public SecurityResourceEntity getSecurityResourceEntity(Long id) {
-        return resourceManager.getResourceEntity(id);
+    public SecurityResourceEntity getSecurityResourceEntity(Long id) throws FortCrudException, IOException {
+        // return resourceManager.getResourceEntity(id);
+        return mapper.readValue(httpClient.get(String.format("%s/%s", API.SECURITY_RESOURCE_ENTITIES, id)), SecurityResourceEntity.class);
     }
 
     /**
