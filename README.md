@@ -1,6 +1,6 @@
 ## Welcome to Fort SDK
 
-![Build Status](http://172.16.8.21:20000/fort/fort-sdk/badges/master/build.svg)
+![Build Status](http://172.16.8.21:20000/ppd/fort-sdk/badges/master/build.svg)
 
 ```xml
 <dependency>
