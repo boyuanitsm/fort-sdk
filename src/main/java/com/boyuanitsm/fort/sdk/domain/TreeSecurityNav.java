@@ -51,7 +51,9 @@ public class TreeSecurityNav {
             this.children.add(child);
         } else {
             // if founded, add child to parent.
-            parent.addChild(child.children.get(0));
+            if (child.children.size() > 0) {
+                parent.addChild(child.children.get(0));
+            }
         }
     }
 
