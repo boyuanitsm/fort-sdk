@@ -492,7 +492,9 @@ public class ResourceManager {
         for (SecurityRole role : roles) {
             // get full role from cache, this role has eager relationships
             SecurityRole fullRole = getRole(role.getId());
-            authorities.addAll(fullRole.getAuthorities());
+            if (fullRole.getAuthorities() != null) {
+                authorities.addAll(fullRole.getAuthorities());
+            }
         }
         context.setAuthorities(authorities);
 
