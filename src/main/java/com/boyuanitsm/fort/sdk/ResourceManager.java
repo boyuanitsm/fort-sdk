@@ -487,13 +487,15 @@ public class ResourceManager {
         context.setSecurityUser(user);
 
         // set authorities
-        Set<SecurityAuthority> authorities = new HashSet<SecurityAuthority>();
+        Set<SecurityAuthority> authorities = new HashSet<>();
         Set<SecurityRole> roles = user.getRoles();
         for (SecurityRole role : roles) {
             // get full role from cache, this role has eager relationships
             SecurityRole fullRole = getRole(role.getId());
-            if (fullRole.getAuthorities() != null) {
+            if (fullRole != null) {
                 authorities.addAll(fullRole.getAuthorities());
+            } else {
+                log.warn("fullRole is null! roleId: {}", role.getId());
             }
         }
         context.setAuthorities(authorities);
