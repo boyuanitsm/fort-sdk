@@ -142,7 +142,7 @@ public class SecurityHttpFilter implements Filter {
                 sendRedirect(response, fortProperties.getLogin().getSuccessReturn());
             }
         } catch (FortAuthenticationException e) {
-            log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password);
+            log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password, e);
             // signIn or password error, redirect to error return
             String errorReturn = request.getParameter(ERROR_RETURN);
             if (errorReturn != null) {
