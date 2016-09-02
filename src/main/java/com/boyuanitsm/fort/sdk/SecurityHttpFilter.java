@@ -72,7 +72,7 @@ public class SecurityHttpFilter implements Filter {
             return;
         }
 
-        log.debug("request uri: {}", requestUri);
+        // log.debug("request uri: {}", requestUri);
 
         if (fortProperties.getLogin().getUrl().equals(requestUri)) {
             log.debug("Start fort login...");
@@ -145,9 +145,10 @@ public class SecurityHttpFilter implements Filter {
                 // not have success_return param, return config uri
                 sendRedirect(response, fortProperties.getLogin().getSuccessReturn());
             }
+            log.debug("Fort login success! login: {}", login);
         } catch (FortAuthenticationException e) {
-            log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password, e);
-            // signIn or password error, redirect to error return
+            log.warn("Authentication fail, login or password wrong, redirect to error return; login: {}, password: {} ErrorMsg:{}", login, password, e.getMessage());
+            // login or password error, redirect to error return
             String errorReturn = request.getParameter(ERROR_RETURN);
             if (errorReturn != null) {
                 // have error_return param, return param value uri
@@ -186,7 +187,7 @@ public class SecurityHttpFilter implements Filter {
             log.warn("token overdue error! ", e);
         }
 
-        log.debug("Logout success!");
+        log.debug("Fort logout success! token: {}", token);
 
         // logout success, redirect to success return
         String successReturn = request.getParameter(SUCCESS_RETURN);
