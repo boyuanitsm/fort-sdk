@@ -108,7 +108,7 @@ public class HttpClient {
                     }
                 }
             }
-        });
+        }).start();
     }
 
     /**
