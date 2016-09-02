@@ -1,5 +1,6 @@
 package com.boyuanitsm.fort.sdk.client;
 
+import com.boyuanitsm.fort.sdk.config.API;
 import com.boyuanitsm.fort.sdk.config.Constants;
 import com.boyuanitsm.fort.sdk.config.FortProperties;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
@@ -53,9 +54,12 @@ public class HttpClient {
     private CookieStore cookieStore;
 
     private ObjectMapper mapper;
+    private FortProperties fortProperties;
+    private boolean tryLogging = false;
 
     @Autowired
     HttpClient(FortProperties fortProperties) {
+        this.fortProperties = fortProperties;
         mapper = ObjectMapperBuilder.build();
         this.baseUrl = fortProperties.getApp().getServerBase();
         httpClient = HttpClients.createDefault();
@@ -69,9 +73,42 @@ public class HttpClient {
                 .build();
     }
 
-    CookieStore loginFortSecurityServer(String url, BasicNameValuePair... pairs) throws FortCrudException {
-        postForm(url, pairs);
+    /**
+     * Login to Fort Server
+     *
+     * @return identity cookie store
+     * @throws FortCrudException
+     */
+    CookieStore loginToFortSecurityServer() throws FortCrudException {
+        postForm(API.AUTHENTICATION, new BasicNameValuePair("j_username", fortProperties.getApp().getAppKey()),
+                new BasicNameValuePair("j_password", fortProperties.getApp().getAppSecret()),
+                new BasicNameValuePair("remember-me", "true"),
+                new BasicNameValuePair("submit", "Login"));
+        log.info("Already logged in to fort serve!");
+        tryLogging = false;
         return cookieStore;
+    }
+
+    private void tryLogin() {
+        tryLogging = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                log.warn("Try to login again to the fort serve!");
+                try {
+                    loginToFortSecurityServer();
+                } catch (FortCrudException e) {
+                    try {
+                        // sleep 5s
+                        Thread.sleep(5000);
+                        // retry
+                        tryLogin();
+                    } catch (InterruptedException e1) {
+                        log.error("sleep error", e);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -272,6 +309,12 @@ public class HttpClient {
             case 400:
                 String fortAppError = response.getFirstHeader("X-fortApp-error").getValue();
                 throw new FortNoValidException(fortAppError);
+            case 401:
+                // Try logging
+                if (!tryLogging) {
+                    tryLogin();
+                }
+                throw new FortCrudException("401(Unauthorized), Didn't get the fort serve authorization, Please check appKey & appSecret");
             default:
                 throw new FortCrudException(String.format("http code is no ok! is %s. %s", statusCode, errMsg));
         }

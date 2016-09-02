@@ -14,9 +14,9 @@ fort:
         # fort server 的基础url
         server-base: http://172.16.8.21:9800
         # 应用 key
-        app-key: zwecds24bjmm
+        app-key: pifavcrnrmn4
         # 应用 secret
-        app-secret: b6yulgieomdu
+        app-secret: vmknt8guhqa0
     # 资源同步服务
     resource-sync:
         # 是否启用

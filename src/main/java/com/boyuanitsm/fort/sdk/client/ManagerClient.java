@@ -36,22 +36,7 @@ public class ManagerClient {
     public ManagerClient(FortProperties fortProperties, HttpClient httpClient) throws FortCrudException {
         mapper = ObjectMapperBuilder.build();
         this.httpClient = httpClient;
-        this.cookieStore = loginFortSecurityServer(fortProperties.getApp().getAppKey(), fortProperties.getApp().getAppSecret());
-    }
-
-    /**
-     * login fort context server. if error throw new RuntimeException
-     *
-     * @param appKey the spring security j_username
-     * @param secret the spring security j_password
-     * @throws FortCrudException
-     */
-    private CookieStore loginFortSecurityServer(String appKey, String secret) throws FortCrudException {
-        return httpClient.loginFortSecurityServer(API.AUTHENTICATION,
-                new BasicNameValuePair("j_username", appKey),
-                new BasicNameValuePair("j_password", secret),
-                new BasicNameValuePair("remember-me", "true"),
-                new BasicNameValuePair("submit", "Login"));
+        this.cookieStore = httpClient.loginToFortSecurityServer();
     }
 
     /**
