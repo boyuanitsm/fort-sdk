@@ -126,7 +126,11 @@ public class SecurityHttpFilter implements Filter {
             cache.updateLoggedUserCache(user);
             // set cookie
             Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, user.getToken());
-            cookie.setDomain(fortProperties.getCookie().getDomain());
+            // set cookie domain
+            String domain = fortProperties.getCookie().getDomain();
+            if  (domain != null && !domain.trim().isEmpty()) {
+                cookie.setDomain(domain);
+            }
             cookie.setMaxAge(fortProperties.getCookie().getMaxAge());
             cookie.setPath("/");
             cookie.setHttpOnly(true);
