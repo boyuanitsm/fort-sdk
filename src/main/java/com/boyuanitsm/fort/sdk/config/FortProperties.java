@@ -206,7 +206,7 @@ public class FortProperties {
         Cookie(Object cookie) {
             Map<String, Object> cookieMap = (Map<String, Object>) cookie;
 
-            this.domain = String.valueOf(cookieMap.get("domain"));
+            this.domain = cookieMap.get("domain") == null ? null : String.valueOf(cookieMap.get("domain"));
             // max-age unit day transform second
             this.maxAge = (int) (Float.valueOf(String.valueOf(cookieMap.get("max-age"))) * (60 * 60 * 24));
         }

@@ -72,7 +72,7 @@ public class SecurityHttpFilter implements Filter {
             return;
         }
 
-        log.debug("request uri: {}", requestUri);
+        // log.debug("request uri: {}", requestUri);
 
         if (fortProperties.getLogin().getUrl().equals(requestUri)) {
             log.debug("Start fort login...");
@@ -126,7 +126,11 @@ public class SecurityHttpFilter implements Filter {
             cache.updateLoggedUserCache(user);
             // set cookie
             Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, user.getToken());
-            cookie.setDomain(fortProperties.getCookie().getDomain());
+            // set cookie domain
+            String domain = fortProperties.getCookie().getDomain();
+            if  (domain != null) {
+                cookie.setDomain(domain);
+            }
             cookie.setMaxAge(fortProperties.getCookie().getMaxAge());
             cookie.setPath("/");
             cookie.setHttpOnly(true);
@@ -141,9 +145,10 @@ public class SecurityHttpFilter implements Filter {
                 // not have success_return param, return config uri
                 sendRedirect(response, fortProperties.getLogin().getSuccessReturn());
             }
+            log.debug("Fort login success! login: {}", login);
         } catch (FortAuthenticationException e) {
-            log.warn("signIn or password error, redirect to error return; login: {}, password: {}", login, password);
-            // signIn or password error, redirect to error return
+            log.warn("Authentication fail, login or password wrong, redirect to error return; login: {}, password: {} ErrorMsg:{}", login, password, e.getMessage());
+            // login or password error, redirect to error return
             String errorReturn = request.getParameter(ERROR_RETURN);
             if (errorReturn != null) {
                 // have error_return param, return param value uri
@@ -168,7 +173,10 @@ public class SecurityHttpFilter implements Filter {
     private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // clear cookie
         Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, "");
-        cookie.setDomain(fortProperties.getCookie().getDomain());
+        String domain = fortProperties.getCookie().getDomain();
+        if (domain != null) {
+            cookie.setDomain(fortProperties.getCookie().getDomain());
+        }
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
@@ -182,7 +190,7 @@ public class SecurityHttpFilter implements Filter {
             log.warn("token overdue error! ", e);
         }
 
-        log.debug("Logout success!");
+        log.debug("Fort logout success! token: {}", token);
 
         // logout success, redirect to success return
         String successReturn = request.getParameter(SUCCESS_RETURN);

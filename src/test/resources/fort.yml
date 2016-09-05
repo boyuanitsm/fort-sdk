@@ -14,9 +14,9 @@ fort:
         # fort server 的基础url
         server-base: http://172.16.8.21:9800
         # 应用 key
-        app-key: zwecds24bjmm
+        app-key: pifavcrnrmn4
         # 应用 secret
-        app-secret: b6yulgieomdu
+        app-secret: jhh91ktsaphv
     # 资源同步服务
     resource-sync:
         # 是否启用
@@ -52,7 +52,7 @@ fort:
     # Cookie 模块
     cookie:
         # cookie的域,可以使多个web服务器共享cookie,如果错误设置domain可能会导致fort失效!
-        domain: localhost
+        # domain:
         # cookie 有效期, 天, 应与应用的会话时间相同
         max-age: 7
     # 不需要过滤的资源
