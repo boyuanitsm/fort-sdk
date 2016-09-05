@@ -173,7 +173,10 @@ public class SecurityHttpFilter implements Filter {
     private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // clear cookie
         Cookie cookie = new Cookie(FORT_USER_TOKEN_COOKIE_NAME, "");
-        cookie.setDomain(fortProperties.getCookie().getDomain());
+        String domain = fortProperties.getCookie().getDomain();
+        if (domain != null) {
+            cookie.setDomain(fortProperties.getCookie().getDomain());
+        }
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
