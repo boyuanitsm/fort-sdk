@@ -7,6 +7,7 @@ import com.boyuanitsm.fort.sdk.client.ManagerClient;
 import com.boyuanitsm.fort.sdk.context.FortContext;
 import com.boyuanitsm.fort.sdk.domain.*;
 import com.boyuanitsm.fort.sdk.exception.FortCrudException;
+import com.boyuanitsm.fort.sdk.util.DimMatcher;
 import com.boyuanitsm.fort.sdk.util.ObjectMapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -66,11 +67,18 @@ public class ResourceManager {
      */
     private static Map<String, SecurityUser> loggedUserCache;
 
+    /**
+     * The dim url resources
+     */
+    private static List<String> dimResources;
+
     private ObjectMapper mapper;
+    private DimMatcher matcher;
 
     @Autowired
     public ResourceManager(ManagerClient managerClient) throws FortCrudException, IOException {
         mapper = ObjectMapperBuilder.build();
+        matcher = new DimMatcher();
         this.managerClient = managerClient;// autowired fort client
         load();// load resource
     }
@@ -87,6 +95,7 @@ public class ResourceManager {
         groupCache = new HashMap<>();
         loggedUserCache = new HashMap<>();
         resourceAuthoritiesMap = new HashMap<>();
+        dimResources = new ArrayList<>();
     }
 
     /**
@@ -105,6 +114,7 @@ public class ResourceManager {
         for (SecurityResourceEntity resourceEntity : resourceEntities) {
             resourceEntityCache.put(resourceEntity.getId(), resourceEntity);
             resourceUrlIdMap.put(resourceEntity.getUrl(), resourceEntity.getId());
+            addDimResource(resourceEntity);
         }
         // load navs
         List<SecurityNav> navs = managerClient.getAllSecurityNavs();
@@ -131,6 +141,17 @@ public class ResourceManager {
         }
 
         log.info("Started fort in {} ms", System.currentTimeMillis() - t1);
+    }
+
+    private void addDimResource(SecurityResourceEntity securityResourceEntity) {
+        if (isDimResource(securityResourceEntity)) {
+            dimResources.add(securityResourceEntity.getUrl());
+        }
+    }
+
+    private boolean isDimResource(SecurityResourceEntity securityResourceEntity) {
+        String url = securityResourceEntity.getUrl();
+        return url != null && url.contains("*");
     }
 
     /**
@@ -206,7 +227,19 @@ public class ResourceManager {
     }
 
     public Long getResourceId(String url) {
-        return resourceUrlIdMap.get(url);
+        Long resourceId = resourceUrlIdMap.get(url);
+
+        if (resourceId != null) {
+            return resourceId;
+        }
+
+        // dim match
+        String match = matcher.match(dimResources, url);
+        if (match != null) {
+            return resourceUrlIdMap.get(match);
+        }
+
+        return null;
     }
 
     public SecurityResourceEntity getResourceEntity(Long id) {
@@ -436,9 +469,12 @@ public class ResourceManager {
                 nav.setResource(resource);
                 navCache.put(resource.getId(), nav);
             }
+
+            addDimResource(resource);
         } else if (DELETE.equals(option)) {
             resourceEntityCache.remove(resource.getId());
             removeResourceUrlIdMapById(resource.getId());
+            dimResources.remove(resource.getUrl());
         }
     }
 
