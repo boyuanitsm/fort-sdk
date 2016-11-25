@@ -74,15 +74,15 @@ public class SecurityHttpFilter implements Filter {
 
         // log.debug("request uri: {}", requestUri);
 
+        Long resourceId = cache.getResourceId(requestUri);
         if (fortProperties.getLogin().getUrl().equals(requestUri)) {
             log.debug("Start fort login...");
             signIn(request, response);
         } else if (fortProperties.getLogout().getUrl().equals(requestUri)) {
             log.debug("Start fort logout...");
             logout(request, response);
-        } else if (cache.getResourceId(requestUri) != null) {
-            log.debug("Start fort authentication...");
-            Long resourceId = cache.getResourceId(requestUri);
+        } else if (resourceId != null) {
+            log.debug("Start fort authentication. resourceId: {}", resourceId);
             authentication(request, response, chain, resourceId);
         } else {
             fortContext(request);
