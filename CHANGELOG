@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+v 1.5.2
+
+    - 资源URL可以使用模糊匹配，匹配优先级是：精确匹配 > 模糊匹配
+
 v 1.5.1
 
     - 修复树菜单有时会出现下标越界
