@@ -147,11 +147,7 @@ public class HttpClient {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPost post = new HttpPost(fullPostUrl.toString());
         // set json string entity
-        try {
-            post.setEntity(new StringEntity(json));
-        } catch (UnsupportedEncodingException e) {
-            throw new FortCrudException(e);
-        }
+        post.setEntity(new StringEntity(json, "UTF-8"));
         post.setHeader("Accept", "application/json");
         post.setHeader("Content-type", "application/json;charset=UTF-8");
         post.setHeader("X-CSRF-TOKEN", getCookieValue("CSRF-TOKEN"));
@@ -185,11 +181,7 @@ public class HttpClient {
         StringBuffer fullPostUrl = new StringBuffer().append(baseUrl).append(url);
         HttpPut put = new HttpPut(fullPostUrl.toString());
         // set json string entity
-        try {
-            put.setEntity(new StringEntity(json));
-        } catch (UnsupportedEncodingException e) {
-            throw new FortCrudException(e);
-        }
+        put.setEntity(new StringEntity(json, "UTF-8"));
         put.setHeader("Accept", "application/json");
         put.setHeader("Content-type", "application/json;charset=UTF-8");
         return send(put);
