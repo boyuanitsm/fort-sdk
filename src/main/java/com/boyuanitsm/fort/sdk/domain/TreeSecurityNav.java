@@ -1,8 +1,8 @@
 package com.boyuanitsm.fort.sdk.domain;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.boyuanitsm.fort.sdk.util.TreeSecurityNavComparator;
+
+import java.util.*;
 
 /**
  * The tree security nav.
@@ -10,6 +10,8 @@ import java.util.List;
  * @author zhanghua on 5/19/16.
  */
 public class TreeSecurityNav {
+
+    private static final TreeSecurityNavComparator treeSecurityNavComparator = new TreeSecurityNavComparator();
 
     private TreeSecurityNav() {
         this.treeId = 0L;
@@ -30,12 +32,33 @@ public class TreeSecurityNav {
         // init tree root
         TreeSecurityNav root = new TreeSecurityNav();
 
-        for (SecurityNav nav: navs) {
+        for (SecurityNav nav : navs) {
             TreeSecurityNav child = transform(new TreeSecurityNav(nav));
             root.addChild(child);
         }
 
+        sort(root.children);
         return root.children;
+    }
+
+    /**
+     * Sort TreeSecurityNav
+     * <p>
+     * If first nav.position > second nav.position return 1;
+     * If first nav.position = second nav.position return 1;
+     * If first nav.position < second nav.position return -1;
+     *
+     * @param treeSecurityNavs
+     */
+    private static void sort(List<TreeSecurityNav> treeSecurityNavs) {
+        Collections.sort(treeSecurityNavs, treeSecurityNavComparator);
+
+        // recursion sort children
+        for (TreeSecurityNav tree : treeSecurityNavs) {
+            if (tree.getChildren().size() > 0) {
+                sort(tree.getChildren());
+            }
+        }
     }
 
     /**

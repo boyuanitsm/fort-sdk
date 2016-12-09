@@ -23,6 +23,12 @@ public class SecurityNav implements Serializable {
 
     private SecurityResourceEntity resource;
 
+    /**
+     * SecurityNav position (sort)
+     * Use base type. when position is null, default is 0.0
+     */
+    private double position;
+
     public Long getId() {
         return id;
     }
@@ -79,6 +85,14 @@ public class SecurityNav implements Serializable {
         this.resource = securityResourceEntity;
     }
 
+    public double getPosition() {
+        return position;
+    }
+
+    public void setPosition(double position) {
+        this.position = position;
+    }
+
     @Override
     public String toString() {
         return "SecurityNav{" +
@@ -89,6 +103,7 @@ public class SecurityNav implements Serializable {
                 ", st='" + st + '\'' +
                 ", parent=" + parent +
                 ", resource=" + resource +
+                ", position=" + position +
                 '}';
     }
 }
