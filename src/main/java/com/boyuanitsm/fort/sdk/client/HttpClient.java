@@ -243,7 +243,7 @@ public class HttpClient {
             // send request
             response = httpClient.execute(request, context);
             // validate http status code
-            isSuccess(response, null);
+            isSuccess(response, request.toString());
             // get response content
             return EntityUtils.toString(response.getEntity());
         } catch (SocketTimeoutException e) {
