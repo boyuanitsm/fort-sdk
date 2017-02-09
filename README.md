@@ -1,11 +1,18 @@
-## Welcome to Fort SDK
+## Fort SDK
 
-![Build Status](http://172.16.8.21:20000/ppd/fort-sdk/badges/master/build.svg)
+### Import from
 
+使用之前务必配置[Boyuan Maven Repository](https://boyuanitsm.github.io/2017/02/07/maven-repository.html)
+
+#### Maven
 ```xml
 <dependency>
     <groupId>com.boyuanitsm</groupId>
     <artifactId>fort-sdk</artifactId>
-    <version>${fort.sdk.version}</version>
+    <version>1.6.1</version>
 </dependency>
+```
+#### Gradle
+```
+compile "com.boyuanitsm:fort-sdk:1.6.1"
 ```
